@@ -8,6 +8,7 @@ import { RagModule } from "./rag";
 import { CatalogsModule } from "./catalogs";
 import { PromptsModule } from "./prompts";
 import { AgentsModule } from "./agents";
+import { ToolsModule } from "./tools";
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AgentsModule } from "./agents";
     CatalogsModule,
     PromptsModule,
     AgentsModule,
+    ToolsModule,
   ],
   controllers: [AppController],
   providers: [],
