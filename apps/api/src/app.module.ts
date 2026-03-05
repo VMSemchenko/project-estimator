@@ -6,6 +6,7 @@ import { DatabaseModule } from "./database";
 import { AiModule } from "./ai";
 import { RagModule } from "./rag";
 import { CatalogsModule } from "./catalogs";
+import { PromptsModule } from "./prompts";
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { CatalogsModule } from "./catalogs";
     AiModule,
     RagModule,
     CatalogsModule,
+    PromptsModule,
   ],
   controllers: [AppController],
   providers: [],
