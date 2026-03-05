@@ -1,6 +1,7 @@
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe, Logger } from "@nestjs/common";
 import { AppModule } from "./app.module";
+import { HttpExceptionFilter } from "./common/middleware/http-exception.filter";
 
 async function bootstrap() {
   const logger = new Logger("Bootstrap");
@@ -14,6 +15,9 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  // Enable global exception filter
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // Enable CORS for frontend integration
   app.enableCors();

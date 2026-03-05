@@ -9,6 +9,7 @@ import { CatalogsModule } from "./catalogs";
 import { PromptsModule } from "./prompts";
 import { AgentsModule } from "./agents";
 import { ToolsModule } from "./tools";
+import { EstimationModule } from "./estimation";
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ToolsModule } from "./tools";
     PromptsModule,
     AgentsModule,
     ToolsModule,
+    EstimationModule,
   ],
   controllers: [AppController],
   providers: [],
