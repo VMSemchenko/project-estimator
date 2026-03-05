@@ -1,0 +1,72 @@
+# BA Processes Catalog for BA Work Estimation System
+# BA processes group related atomic works together
+
+ba_processes:
+  # ===========================================
+  # ELICITATION PROCESSES
+  # ===========================================
+  - id: requirements_elicitation
+    name: Requirements Elicitation
+    description: Activities for gathering requirements from stakeholders through various techniques
+    category: elicitation
+
+  # ===========================================
+  # DOCUMENTATION PROCESSES
+  # ===========================================
+  - id: requirements_documentation
+    name: Requirements Documentation
+    description: Writing and maintaining requirement documents, user stories, and specifications
+    category: documentation
+
+  # ===========================================
+  # MODELING PROCESSES
+  # ===========================================
+  - id: process_modeling
+    name: Process Modeling
+    description: Creating visual representations of business processes and workflows
+    category: modeling
+
+  - id: data_modeling
+    name: Data Modeling
+    description: Designing data structures, relationships, and information flows
+    category: modeling
+
+  # ===========================================
+  # ANALYSIS PROCESSES
+  # ===========================================
+  - id: requirements_analysis
+    name: Requirements Analysis
+    description: Analyzing requirements for feasibility, impact, and alignment with business goals
+    category: analysis
+
+  # ===========================================
+  # VALIDATION PROCESSES
+  # ===========================================
+  - id: requirements_validation
+    name: Requirements Validation
+    description: Ensuring requirements are accurate, complete, and approved by stakeholders
+    category: validation
+
+  # ===========================================
+  # COMMUNICATION PROCESSES
+  # ===========================================
+  - id: stakeholder_communication
+    name: Stakeholder Communication
+    description: Communicating requirements, status, and findings to stakeholders
+    category: communication
+
+  # ===========================================
+  # PLANNING PROCESSES
+  # ===========================================
+  - id: requirements_planning
+    name: Requirements Planning
+    description: Planning and scoping requirements activities and deliverables
+    category: planning
+
+  # ===========================================
+  # RESEARCH PROCESSES
+  # ===========================================
+  - id: requirements_research
+    name: Requirements Research
+    description: Researching market, systems, and existing documentation to inform requirements
+    category: research

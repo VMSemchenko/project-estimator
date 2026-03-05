@@ -5,6 +5,7 @@ import { AppController } from "./app.controller";
 import { DatabaseModule } from "./database";
 import { AiModule } from "./ai";
 import { RagModule } from "./rag";
+import { CatalogsModule } from "./catalogs";
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { RagModule } from "./rag";
     DatabaseModule,
     AiModule,
     RagModule,
+    CatalogsModule,
   ],
   controllers: [AppController],
   providers: [],

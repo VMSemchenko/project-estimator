@@ -1,0 +1,312 @@
+# Coefficients Catalog for BA Work Estimation System
+# Complexity coefficients that modify base hours based on project factors
+
+coefficients:
+  # ===========================================
+  # SYSTEM COMPLEXITY
+  # ===========================================
+  - id: legacy_integration
+    name: Legacy System Integration
+    description: Work involves legacy systems with limited documentation or outdated technology
+    multiplier: 1.5
+    triggers:
+      - "legacy"
+      - "old system"
+      - "mainframe"
+      - "outdated"
+      - "antiquated"
+      - "deprecated system"
+
+  - id: reverse_engineering
+    name: Reverse Engineering Required
+    description: No documentation available, requires reverse engineering existing code or processes
+    multiplier: 2.0
+    triggers:
+      - "no documentation"
+      - "undocumented"
+      - "reverse engineer"
+      - "no specs"
+      - "missing documentation"
+      - "undocumented system"
+
+  - id: multiple_systems
+    name: Multiple System Integration
+    description: Work involves integration between multiple systems or platforms
+    multiplier: 1.4
+    triggers:
+      - "integration"
+      - "multiple systems"
+      - "cross-platform"
+      - "system integration"
+      - "interoperability"
+
+  - id: complex_architecture
+    name: Complex Architecture
+    description: System has complex distributed or microservices architecture
+    multiplier: 1.3
+    triggers:
+      - "microservices"
+      - "distributed"
+      - "complex architecture"
+      - "service mesh"
+      - "event-driven"
+
+  # ===========================================
+  # STAKEHOLDER COMPLEXITY
+  # ===========================================
+  - id: multiple_stakeholders
+    name: Multiple Stakeholders
+    description: Coordination required between multiple stakeholder groups or departments
+    multiplier: 1.3
+    triggers:
+      - "multiple teams"
+      - "cross-functional"
+      - "several stakeholders"
+      - "many departments"
+      - "multiple groups"
+      - "cross-departmental"
+
+  - id: conflicting_requirements
+    name: Conflicting Requirements
+    description: Stakeholders have conflicting or competing requirements that need resolution
+    multiplier: 1.5
+    triggers:
+      - "conflicting"
+      - "competing requirements"
+      - "disagreement"
+      - "conflicting interests"
+      - "opposing views"
+
+  - id: executive_involvement
+    name: Executive Level Involvement
+    description: Senior executives or C-level stakeholders are directly involved
+    multiplier: 1.2
+    triggers:
+      - "executive"
+      - "C-level"
+      - "senior management"
+      - "board"
+      - "VP"
+      - "director level"
+
+  - id: external_stakeholders
+    name: External Stakeholders
+    description: Work involves external parties such as vendors, partners, or customers
+    multiplier: 1.3
+    triggers:
+      - "external"
+      - "vendor"
+      - "third party"
+      - "partner"
+      - "customer involvement"
+      - "suppliers"
+
+  # ===========================================
+  # DOMAIN COMPLEXITY
+  # ===========================================
+  - id: regulatory_compliance
+    name: Regulatory Compliance
+    description: Work must comply with specific regulatory requirements or standards
+    multiplier: 1.4
+    triggers:
+      - "regulatory"
+      - "compliance"
+      - "GDPR"
+      - "HIPAA"
+      - "SOX"
+      - "PCI"
+      - "audit"
+      - "regulation"
+
+  - id: specialized_domain
+    name: Specialized Domain Knowledge
+    description: Requires deep expertise in a specialized industry or domain
+    multiplier: 1.3
+    triggers:
+      - "specialized"
+      - "domain expertise"
+      - "industry specific"
+      - "niche"
+      - "specialized knowledge"
+      - "expert domain"
+
+  - id: new_domain
+    name: New Domain Learning
+    description: BA needs to learn a new domain or industry as part of the project
+    multiplier: 1.4
+    triggers:
+      - "new domain"
+      - "unfamiliar industry"
+      - "learning curve"
+      - "new industry"
+      - "domain learning"
+
+  # ===========================================
+  # PROJECT COMPLEXITY
+  # ===========================================
+  - id: tight_deadline
+    name: Tight Deadline
+    description: Project has aggressive or compressed timeline
+    multiplier: 1.3
+    triggers:
+      - "tight deadline"
+      - "aggressive timeline"
+      - "urgent"
+      - "ASAP"
+      - "compressed schedule"
+      - "fast track"
+
+  - id: large_scope
+    name: Large Scope
+    description: Project has a large scope with many deliverables or features
+    multiplier: 1.3
+    triggers:
+      - "large project"
+      - "big scope"
+      - "enterprise scale"
+      - "major initiative"
+      - "large scale"
+
+  - id: fixed_price
+    name: Fixed Price Contract
+    description: Project is under fixed price contract requiring precise estimation
+    multiplier: 1.2
+    triggers:
+      - "fixed price"
+      - "firm fixed price"
+      - "lump sum"
+      - "fixed budget"
+
+  - id: agile_transformation
+    name: Agile Transformation
+    description: Organization is transitioning from waterfall to agile methodology
+    multiplier: 1.3
+    triggers:
+      - "agile transformation"
+      - "methodology change"
+      - "transitioning to agile"
+      - "adopting agile"
+      - "scrum adoption"
+
+  # ===========================================
+  # TECHNICAL COMPLEXITY
+  # ===========================================
+  - id: data_migration
+    name: Data Migration
+    description: Work involves significant data migration or transformation activities
+    multiplier: 1.4
+    triggers:
+      - "data migration"
+      - "migration"
+      - "data conversion"
+      - "ETL"
+      - "data transfer"
+
+  - id: security_requirements
+    name: High Security Requirements
+    description: Project has elevated security or privacy requirements
+    multiplier: 1.3
+    triggers:
+      - "security"
+      - "encryption"
+      - "authentication"
+      - "authorization"
+      - "high security"
+      - "sensitive data"
+
+  - id: performance_requirements
+    name: Performance Requirements
+    description: Strict performance, scalability, or latency requirements
+    multiplier: 1.2
+    triggers:
+      - "performance"
+      - "scalability"
+      - "latency"
+      - "high availability"
+      - "throughput"
+      - "response time"
+
+  - id: api_integration
+    name: API Integration
+    description: Work involves designing or integrating with multiple APIs
+    multiplier: 1.2
+    triggers:
+      - "API"
+      - "REST"
+      - "GraphQL"
+      - "web service"
+      - "API integration"
+
+  # ===========================================
+  # TEAM COMPLEXITY
+  # ===========================================
+  - id: distributed_team
+    name: Distributed Team
+    description: Team members are geographically distributed across time zones
+    multiplier: 1.2
+    triggers:
+      - "distributed team"
+      - "remote team"
+      - "offshore"
+      - "nearshore"
+      - "multiple time zones"
+      - "global team"
+
+  - id: language_barrier
+    name: Language Barrier
+    description: Communication challenges due to language differences
+    multiplier: 1.2
+    triggers:
+      - "language barrier"
+      - "translation"
+      - "multilingual"
+      - "different languages"
+
+  - id: new_team
+    name: New Team Formation
+    description: Team is newly formed and needs time to establish processes
+    multiplier: 1.2
+    triggers:
+      - "new team"
+      - "team formation"
+      - "forming"
+      - "new members"
+
+  # ===========================================
+  # REQUIREMENTS COMPLEXITY
+  # ===========================================
+  - id: unclear_requirements
+    name: Unclear Requirements
+    description: Initial requirements are vague or poorly defined
+    multiplier: 1.5
+    triggers:
+      - "unclear"
+      - "vague"
+      - "ambiguous"
+      - "ill-defined"
+      - "fuzzy requirements"
+      - "not well defined"
+
+  - id: changing_requirements
+    name: Volatile Requirements
+    description: Requirements are expected to change frequently during the project
+    multiplier: 1.4
+    triggers:
+      - "changing requirements"
+      - "volatile"
+      - "evolving"
+      - "fluid requirements"
+      - "scope creep"
+      - "moving target"
+
+  - id: innovative_solution
+    name: Innovative Solution
+    description: Project requires innovative or first-of-kind solution
+    multiplier: 1.5
+    triggers:
+      - "innovative"
+      - "first of kind"
+      - "cutting edge"
+      - "novel"
+      - "experimental"
+      - "proof of concept"

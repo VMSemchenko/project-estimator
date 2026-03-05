@@ -1,0 +1,588 @@
+# Atomic Works Catalog for BA Work Estimation System
+# Each atomic work represents a discrete, measurable BA activity
+
+atomic_works:
+  # ===========================================
+  # REQUIREMENTS ELICITATION
+  # ===========================================
+  - id: conduct_interview
+    name: Conduct Stakeholder Interview
+    description: Interview stakeholder for requirements gathering, including preparation and follow-up
+    base_hours: 1.0
+    category: elicitation
+    ba_process: requirements_elicitation
+    keywords:
+      - interview
+      - stakeholder
+      - gathering
+      - one-on-one
+      - meeting
+
+  - id: facilitate_workshop
+    name: Facilitate Requirements Workshop
+    description: Lead a collaborative workshop session with multiple stakeholders to gather requirements
+    base_hours: 3.0
+    category: workshop
+    ba_process: requirements_elicitation
+    keywords:
+      - workshop
+      - facilitation
+      - collaborative
+      - group session
+      - brainstorming
+
+  - id: conduct_survey
+    name: Design and Analyze Survey
+    description: Create survey questionnaire, distribute to stakeholders, and analyze results
+    base_hours: 4.0
+    category: elicitation
+    ba_process: requirements_elicitation
+    keywords:
+      - survey
+      - questionnaire
+      - poll
+      - feedback collection
+      - data gathering
+
+  - id: observation_session
+    name: Conduct Observation Session
+    description: Observe users in their work environment to understand current processes
+    base_hours: 2.0
+    category: elicitation
+    ba_process: requirements_elicitation
+    keywords:
+      - observation
+      - job shadowing
+      - user research
+      - ethnographic
+      - field study
+
+  - id: focus_group
+    name: Facilitate Focus Group
+    description: Lead a focused discussion group to gather in-depth requirements and feedback
+    base_hours: 2.5
+    category: elicitation
+    ba_process: requirements_elicitation
+    keywords:
+      - focus group
+      - group discussion
+      - facilitated session
+      - requirements discovery
+
+  # ===========================================
+  # REQUIREMENTS DOCUMENTATION
+  # ===========================================
+  - id: write_user_story
+    name: Write User Story
+    description: Create user story with acceptance criteria following INVEST principles
+    base_hours: 0.5
+    category: documentation
+    ba_process: requirements_documentation
+    keywords:
+      - user story
+      - acceptance criteria
+      - requirement documentation
+      - agile
+      - backlog item
+
+  - id: write_epic
+    name: Write Epic
+    description: Create epic with high-level description and breakdown guidance
+    base_hours: 1.5
+    category: documentation
+    ba_process: requirements_documentation
+    keywords:
+      - epic
+      - large requirement
+      - feature
+      - initiative
+      - theme
+
+  - id: create_brdd
+    name: Create Business Requirements Document
+    description: Write comprehensive Business Requirements Definition Document (BRDD)
+    base_hours: 8.0
+    category: documentation
+    ba_process: requirements_documentation
+    keywords:
+      - BRD
+      - business requirements
+      - requirements document
+      - specification
+      - formal documentation
+
+  - id: create_srs
+    name: Create Software Requirements Specification
+    description: Write detailed Software Requirements Specification (SRS) document
+    base_hours: 12.0
+    category: documentation
+    ba_process: requirements_documentation
+    keywords:
+      - SRS
+      - software requirements
+      - technical specification
+      - detailed requirements
+      - functional spec
+
+  - id: write_use_case
+    name: Write Use Case
+    description: Create detailed use case with preconditions, postconditions, and alternative flows
+    base_hours: 1.0
+    category: documentation
+    ba_process: requirements_documentation
+    keywords:
+      - use case
+      - scenario
+      - actor interaction
+      - functional requirement
+      - user flow
+
+  - id: create_data_dictionary
+    name: Create Data Dictionary
+    description: Document data elements, their definitions, and relationships
+    base_hours: 4.0
+    category: documentation
+    ba_process: requirements_documentation
+    keywords:
+      - data dictionary
+      - data definitions
+      - glossary
+      - data elements
+      - metadata
+
+  - id: write_acceptance_criteria
+    name: Write Acceptance Criteria
+    description: Define detailed acceptance criteria for a requirement or user story
+    base_hours: 0.5
+    category: documentation
+    ba_process: requirements_documentation
+    keywords:
+      - acceptance criteria
+      - definition of done
+      - verification
+      - test criteria
+      - conditions of satisfaction
+
+  - id: create_backlog_item
+    name: Create Backlog Item
+    description: Create and refine a product backlog item with all necessary details
+    base_hours: 0.75
+    category: documentation
+    ba_process: requirements_documentation
+    keywords:
+      - backlog
+      - product backlog item
+      - PBI
+      - refinement
+      - grooming
+
+  # ===========================================
+  # PROCESS MODELING
+  # ===========================================
+  - id: create_process_diagram
+    name: Create Process Diagram
+    description: Model business process visually using BPMN or flowchart notation
+    base_hours: 2.0
+    category: modeling
+    ba_process: process_modeling
+    keywords:
+      - process flow
+      - BPMN
+      - workflow
+      - business process
+      - flowchart
+
+  - id: create_swimlane_diagram
+    name: Create Swimlane Diagram
+    description: Create cross-functional flowchart showing responsibilities across roles
+    base_hours: 2.5
+    category: modeling
+    ba_process: process_modeling
+    keywords:
+      - swimlane
+      - cross-functional
+      - responsibilities
+      - roles
+      - lanes
+
+  - id: create_state_diagram
+    name: Create State Diagram
+    description: Model entity lifecycle and state transitions
+    base_hours: 2.0
+    category: modeling
+    ba_process: process_modeling
+    keywords:
+      - state machine
+      - state diagram
+      - lifecycle
+      - transitions
+      - entity states
+
+  - id: create_activity_diagram
+    name: Create Activity Diagram
+    description: Model workflow and activities using UML activity diagram notation
+    base_hours: 2.0
+    category: modeling
+    ba_process: process_modeling
+    keywords:
+      - activity diagram
+      - UML
+      - workflow
+      - actions
+      - control flow
+
+  - id: create_sequence_diagram
+    name: Create Sequence Diagram
+    description: Model interactions between components over time using UML sequence diagram
+    base_hours: 2.5
+    category: modeling
+    ba_process: process_modeling
+    keywords:
+      - sequence diagram
+      - UML
+      - interactions
+      - message flow
+      - timing
+
+  # ===========================================
+  # DATA MODELING
+  # ===========================================
+  - id: create_er_diagram
+    name: Create Entity-Relationship Diagram
+    description: Design data model showing entities, attributes, and relationships
+    base_hours: 3.0
+    category: modeling
+    ba_process: data_modeling
+    keywords:
+      - ERD
+      - entity relationship
+      - data model
+      - database design
+      - schema
+
+  - id: create_class_diagram
+    name: Create Class Diagram
+    description: Design object-oriented model using UML class diagram notation
+    base_hours: 3.0
+    category: modeling
+    ba_process: data_modeling
+    keywords:
+      - class diagram
+      - UML
+      - object model
+      - OOP
+      - structure
+
+  - id: create_data_flow_diagram
+    name: Create Data Flow Diagram
+    description: Model how data moves through a system using DFD notation
+    base_hours: 2.5
+    category: modeling
+    ba_process: data_modeling
+    keywords:
+      - DFD
+      - data flow
+      - data movement
+      - process flow
+      - information flow
+
+  # ===========================================
+  # ANALYSIS
+  # ===========================================
+  - id: gap_analysis
+    name: Conduct Gap Analysis
+    description: Analyze current state vs desired state and identify gaps
+    base_hours: 4.0
+    category: analysis
+    ba_process: requirements_analysis
+    keywords:
+      - gap analysis
+      - current state
+      - future state
+      - difference
+      - assessment
+
+  - id: impact_analysis
+    name: Conduct Impact Analysis
+    description: Assess the impact of proposed changes on systems, processes, and stakeholders
+    base_hours: 3.0
+    category: analysis
+    ba_process: requirements_analysis
+    keywords:
+      - impact analysis
+      - change impact
+      - affected areas
+      - ripple effect
+      - consequences
+
+  - id: feasibility_analysis
+    name: Conduct Feasibility Analysis
+    description: Evaluate technical, operational, and economic feasibility of a solution
+    base_hours: 4.0
+    category: analysis
+    ba_process: requirements_analysis
+    keywords:
+      - feasibility
+      - viability
+      - practical
+      - assessment
+      - evaluation
+
+  - id: root_cause_analysis
+    name: Conduct Root Cause Analysis
+    description: Identify underlying causes of problems using techniques like 5 Whys or Fishbone
+    base_hours: 2.0
+    category: analysis
+    ba_process: requirements_analysis
+    keywords:
+      - root cause
+      - 5 whys
+      - fishbone
+      - ishikawa
+      - problem analysis
+
+  - id: stakeholder_analysis
+    name: Conduct Stakeholder Analysis
+    description: Identify stakeholders, their interests, influence, and engagement strategy
+    base_hours: 2.0
+    category: analysis
+    ba_process: requirements_analysis
+    keywords:
+      - stakeholder analysis
+      - stakeholder mapping
+      - influence
+      - interest
+      - power grid
+
+  - id: swot_analysis
+    name: Conduct SWOT Analysis
+    description: Analyze strengths, weaknesses, opportunities, and threats
+    base_hours: 1.5
+    category: analysis
+    ba_process: requirements_analysis
+    keywords:
+      - SWOT
+      - strengths
+      - weaknesses
+      - opportunities
+      - threats
+
+  - id: cost_benefit_analysis
+    name: Conduct Cost-Benefit Analysis
+    description: Compare costs and benefits of a proposed solution or initiative
+    base_hours: 4.0
+    category: analysis
+    ba_process: requirements_analysis
+    keywords:
+      - cost benefit
+      - ROI
+      - financial analysis
+      - business case
+      - investment
+
+  - id: risk_analysis
+    name: Conduct Risk Analysis
+    description: Identify, assess, and document project or solution risks
+    base_hours: 2.0
+    category: analysis
+    ba_process: requirements_analysis
+    keywords:
+      - risk analysis
+      - risk assessment
+      - risk identification
+      - mitigation
+      - threats
+
+  # ===========================================
+  # VALIDATION
+  # ===========================================
+  - id: requirements_review
+    name: Conduct Requirements Review
+    description: Review requirements documentation with stakeholders for accuracy and completeness
+    base_hours: 2.0
+    category: validation
+    ba_process: requirements_validation
+    keywords:
+      - requirements review
+      - peer review
+      - walkthrough
+      - inspection
+      - validation
+
+  - id: prototype_review
+    name: Conduct Prototype Review
+    description: Review prototype or mockup with stakeholders to validate requirements
+    base_hours: 1.5
+    category: validation
+    ba_process: requirements_validation
+    keywords:
+      - prototype
+      - mockup
+      - wireframe
+      - validation
+      - user feedback
+
+  - id: traceability_matrix
+    name: Create Requirements Traceability Matrix
+    description: Build and maintain traceability between requirements and other artifacts
+    base_hours: 3.0
+    category: validation
+    ba_process: requirements_validation
+    keywords:
+      - traceability
+      - RTM
+      - requirements mapping
+      - coverage
+      - trace matrix
+
+  - id: sign_off_obtain
+    name: Obtain Requirements Sign-off
+    description: Get formal approval from stakeholders on requirements documentation
+    base_hours: 1.0
+    category: validation
+    ba_process: requirements_validation
+    keywords:
+      - sign-off
+      - approval
+      - acceptance
+      - formal
+      - baseline
+
+  # ===========================================
+  # COMMUNICATION
+  # ===========================================
+  - id: status_report
+    name: Create Status Report
+    description: Prepare and distribute requirements or project status report
+    base_hours: 0.5
+    category: communication
+    ba_process: stakeholder_communication
+    keywords:
+      - status report
+      - progress
+      - update
+      - weekly report
+      - dashboard
+
+  - id: presentation_prepare
+    name: Prepare Presentation
+    description: Create presentation materials for stakeholder communication
+    base_hours: 2.0
+    category: communication
+    ba_process: stakeholder_communication
+    keywords:
+      - presentation
+      - slides
+      - deck
+      - stakeholder communication
+      - briefing
+
+  - id: presentation_deliver
+    name: Deliver Presentation
+    description: Present findings, requirements, or solutions to stakeholders
+    base_hours: 1.0
+    category: communication
+    ba_process: stakeholder_communication
+    keywords:
+      - present
+      - deliver
+      - speak
+      - demo
+      - briefing
+
+  - id: meeting_minutes
+    name: Document Meeting Minutes
+    description: Capture and distribute meeting notes and action items
+    base_hours: 0.5
+    category: communication
+    ba_process: stakeholder_communication
+    keywords:
+      - meeting minutes
+      - notes
+      - action items
+      - documentation
+      - record
+
+  # ===========================================
+  # PLANNING
+  # ===========================================
+  - id: scope_definition
+    name: Define Project Scope
+    description: Document project scope including in-scope and out-of-scope items
+    base_hours: 3.0
+    category: planning
+    ba_process: requirements_planning
+    keywords:
+      - scope
+      - scope definition
+      - boundaries
+      - in scope
+      - out of scope
+
+  - id: wbs_creation
+    name: Create Work Breakdown Structure
+    description: Decompose project deliverables into manageable work packages
+    base_hours: 4.0
+    category: planning
+    ba_process: requirements_planning
+    keywords:
+      - WBS
+      - work breakdown
+      - decomposition
+      - deliverables
+      - work packages
+
+  - id: estimation_support
+    name: Support Estimation Session
+    description: Participate in estimation activities (planning poker, etc.)
+    base_hours: 1.0
+    category: planning
+    ba_process: requirements_planning
+    keywords:
+      - estimation
+      - planning poker
+      - story points
+      - sizing
+      - effort estimation
+
+  # ===========================================
+  # RESEARCH
+  # ===========================================
+  - id: market_research
+    name: Conduct Market Research
+    description: Research market trends, competitors, and industry best practices
+    base_hours: 4.0
+    category: research
+    ba_process: requirements_research
+    keywords:
+      - market research
+      - competitive analysis
+      - industry trends
+      - benchmarking
+      - best practices
+
+  - id: document_analysis
+    name: Analyze Existing Documentation
+    description: Review and analyze existing system documentation, reports, or processes
+    base_hours: 2.0
+    category: research
+    ba_process: requirements_research
+    keywords:
+      - document analysis
+      - existing systems
+      - legacy documentation
+      - current state
+      - as-is analysis
+
+  - id: system_analysis
+    name: Analyze Current System
+    description: Study and document current system functionality and limitations
+    base_hours: 4.0
+    category: research
+    ba_process: requirements_research
+    keywords:
+      - system analysis
+      - current system
+      - as-is
+      - existing functionality
+      - legacy system
