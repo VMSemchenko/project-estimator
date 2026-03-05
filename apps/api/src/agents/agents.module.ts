@@ -29,6 +29,14 @@ import {
   EstimationReport,
 } from './interfaces/agent-state.interface';
 import { PipelineResult, PipelineSummary } from './interfaces/agent-result.interface';
+import {
+  createEstimationGraph,
+  executeEstimationGraph,
+  streamEstimationGraph,
+  EstimationGraph,
+  GraphState,
+  GraphExecutionOptions,
+} from './graph';
 
 /**
  * Service for orchestrating agent node execution
@@ -236,6 +244,112 @@ export class AgentsService {
 }
 
 /**
+ * Service for executing the LangGraph-based estimation pipeline
+ * This service uses the StateGraph orchestration for more robust execution
+ */
+@Injectable()
+export class GraphService {
+  private readonly logger = new Logger(GraphService.name);
+  private graph: EstimationGraph | null = null;
+
+  constructor(private readonly agentDependencies: AgentDependencies) {}
+
+  /**
+   * Get or create the estimation graph (lazy initialization)
+   */
+  private getGraph(): EstimationGraph {
+    if (!this.graph) {
+      this.logger.log('Initializing estimation graph...');
+      this.graph = createEstimationGraph(this.agentDependencies);
+    }
+    return this.graph;
+  }
+
+  /**
+   * Run the complete estimation pipeline using LangGraph
+   * @param inputFolder - Path to the input folder containing artifacts
+   * @param options - Execution options
+   * @returns Final graph state
+   */
+  async runEstimation(
+    inputFolder: string,
+    options?: GraphExecutionOptions
+  ): Promise<GraphState> {
+    this.logger.log(`Starting LangGraph estimation for: ${inputFolder}`);
+    const startTime = Date.now();
+
+    try {
+      const graph = this.getGraph();
+      const result = await executeEstimationGraph(graph, inputFolder, options);
+
+      const duration = Date.now() - startTime;
+      this.logger.log(`LangGraph estimation completed in ${duration}ms`);
+
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`LangGraph estimation failed: ${errorMessage}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Stream estimation results for real-time progress updates
+   * @param inputFolder - Path to the input folder containing artifacts
+   * @param options - Execution options
+   * @returns Async generator yielding state updates
+   */
+  async *streamEstimation(
+    inputFolder: string,
+    options?: GraphExecutionOptions
+  ): AsyncGenerator<{ node: string; state: GraphState }> {
+    this.logger.log(`Starting LangGraph stream estimation for: ${inputFolder}`);
+
+    const graph = this.getGraph();
+    yield* streamEstimationGraph(graph, inputFolder, options);
+  }
+
+  /**
+   * Get the report from a completed graph state
+   */
+  getReport(state: GraphState): EstimationReport | undefined {
+    return state.report;
+  }
+
+  /**
+   * Check if the estimation was successful
+   */
+  isSuccess(state: GraphState): boolean {
+    return !state.shouldStop && state.errors.length === 0;
+  }
+
+  /**
+   * Get a summary of the estimation results
+   */
+  getSummary(state: GraphState): {
+    artifactsProcessed: number;
+    requirementsExtracted: number;
+    atomicWorksIdentified: number;
+    estimatesGenerated: number;
+    totalEstimatedHours: number;
+    validationPassed: boolean;
+    reportGenerated: boolean;
+    errorCount: number;
+  } {
+    return {
+      artifactsProcessed: state.artifacts.length,
+      requirementsExtracted: state.requirements.length,
+      atomicWorksIdentified: state.atomicWorks.length,
+      estimatesGenerated: state.estimates.length,
+      totalEstimatedHours: state.report?.totalHours || 0,
+      validationPassed: state.validationStatus === 'valid',
+      reportGenerated: !!state.report,
+      errorCount: state.errors.length,
+    };
+  }
+}
+
+/**
  * Module for managing and executing LangGraph agent nodes
  */
 @Module({
@@ -283,15 +397,24 @@ export class AgentsService {
       }),
       inject: [PromptsService, LangchainLLMProvider, RagService, LangfuseService],
     },
+    // Graph service provider
+    {
+      provide: 'GRAPH_SERVICE',
+      useFactory: (deps: AgentDependencies) => new GraphService(deps),
+      inject: ['AGENT_DEPENDENCIES'],
+    },
     AgentsService,
+    GraphService,
   ],
   exports: [
     AgentsService,
+    GraphService,
     'VALIDATION_NODE',
     'EXTRACTION_NODE',
     'DECOMPOSITION_NODE',
     'ESTIMATION_NODE',
     'REPORTING_NODE',
+    'GRAPH_SERVICE',
   ],
 })
 export class AgentsModule implements OnModuleInit {
