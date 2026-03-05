@@ -5,6 +5,7 @@ import {
   PertEstimate,
   DiscoveredFile,
 } from '../../prompts/interfaces/prompt-context.interface';
+import { TraceContext } from '../../observability/interfaces/trace-context.interface';
 
 /**
  * Status of the validation stage
@@ -245,6 +246,10 @@ export interface EstimationState {
 
   /** Whether the pipeline should stop */
   shouldStop: boolean;
+
+  // === Observability ===
+  /** Trace context for observability */
+  traceContext?: TraceContext;
 }
 
 /**

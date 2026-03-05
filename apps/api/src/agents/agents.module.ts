@@ -29,6 +29,7 @@ import {
   EstimationReport,
 } from './interfaces/agent-state.interface';
 import { PipelineResult, PipelineSummary } from './interfaces/agent-result.interface';
+import { TraceContext } from '../observability/interfaces/trace-context.interface';
 import {
   createEstimationGraph,
   executeEstimationGraph,
@@ -55,13 +56,21 @@ export class AgentsService {
 
   /**
    * Run the complete estimation pipeline
+   * @param inputFolder - Path to the input folder
+   * @param traceContext - Optional trace context for observability
    */
-  async runEstimationPipeline(inputFolder: string): Promise<PipelineResult> {
+  async runEstimationPipeline(
+    inputFolder: string,
+    traceContext?: TraceContext,
+  ): Promise<PipelineResult> {
     const startTime = Date.now();
     this.logger.log(`Starting estimation pipeline for: ${inputFolder}`);
 
-    // Initialize state
+    // Initialize state with trace context
     let state = createInitialState(inputFolder);
+    if (traceContext) {
+      state.traceContext = traceContext;
+    }
     const nodeResults: PipelineResult['nodeResults'] = [];
 
     try {

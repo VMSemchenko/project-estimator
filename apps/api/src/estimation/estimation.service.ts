@@ -12,6 +12,8 @@ import {
 } from './interfaces/estimation-job.interface';
 import { CreateEstimationDto } from './dto/create-estimation.dto';
 import { AgentsService } from '../agents';
+import { TracingService, MetricsService } from '../observability';
+import { TraceContext } from '../observability/interfaces/trace-context.interface';
 
 /**
  * Service for managing estimation jobs
@@ -24,6 +26,8 @@ export class EstimationService {
   constructor(
     private readonly configService: ConfigService,
     private readonly agentsService: AgentsService,
+    private readonly tracingService: TracingService,
+    private readonly metricsService: MetricsService,
   ) {}
 
   /**
@@ -123,14 +127,30 @@ export class EstimationService {
       return;
     }
 
+    // Start tracing for this estimation
+    const traceContext = this.tracingService.startEstimationTrace({
+      estimationId: id,
+      inputFolder: job.inputFolder,
+      metadata: {
+        testMode: job.testMode,
+        verbose: job.verbose,
+      },
+    });
+
+    // Create metrics builder
+    const metricsBuilder = this.metricsService.createBuilder(id);
+
     try {
       // Update status to processing
       job.status = EstimationStatus.PROCESSING;
       this.jobs.set(id, job);
       this.logger.log(`Processing estimation: ${id}`);
 
-      // Execute the estimation pipeline
-      const result = await this.agentsService.runEstimationPipeline(job.inputFolder);
+      // Execute the estimation pipeline with trace context
+      const result = await this.agentsService.runEstimationPipeline(
+        job.inputFolder,
+        traceContext,
+      );
 
       // Update job with results
       job.status = EstimationStatus.COMPLETED;
@@ -153,14 +173,46 @@ export class EstimationService {
 
       this.jobs.set(id, job);
       this.logger.log(`Completed estimation: ${id}`);
+
+      // End tracing and record metrics
+      this.tracingService.endEstimationTrace(traceContext, {
+        success: true,
+        summary: job.summary,
+      });
+
+      metricsBuilder
+        .markCompleted()
+        .withDuration(Date.now() - traceContext.startTime.getTime());
+
+      this.metricsService.recordEstimationMetrics(metricsBuilder.build());
+
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorObj = error instanceof Error ? error : new Error(errorMessage);
       this.logger.error(`Estimation ${id} failed:`, errorMessage);
 
       job.status = EstimationStatus.FAILED;
       job.error = errorMessage;
       job.completedAt = new Date();
       this.jobs.set(id, job);
+
+      // Record error in trace and metrics
+      this.tracingService.recordTraceError(traceContext, errorObj, {
+        stage: 'estimation',
+      });
+      this.tracingService.endEstimationTrace(traceContext, {
+        success: false,
+        error: errorMessage,
+      });
+
+      metricsBuilder
+        .markFailed(errorMessage)
+        .withDuration(Date.now() - traceContext.startTime.getTime());
+
+      this.metricsService.recordEstimationMetrics(metricsBuilder.build());
+    } finally {
+      // Flush trace data
+      await this.tracingService.flush();
     }
   }
 
