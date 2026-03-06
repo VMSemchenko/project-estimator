@@ -24,12 +24,13 @@ describe("CatalogRetrieverTool", () => {
 
     mockRagService = {
       search: jest.fn(),
+      similaritySearch: jest.fn(),
       indexDocument: jest.fn(),
       deleteDocument: jest.fn(),
     };
 
-    tool = new CatalogRetrieverTool(mockCatalogsService, mockRagService);
     jest.clearAllMocks();
+    tool = new CatalogRetrieverTool(mockCatalogsService, mockRagService);
   });
 
   describe("basic properties", () => {
@@ -183,29 +184,30 @@ describe("CatalogRetrieverTool", () => {
         ],
       };
 
-      mockCatalogsService.searchBaProcessesRag.mockResolvedValue(
+      mockRagService.similaritySearch.mockResolvedValue(
         mockSearchResult as any,
       );
       mockCatalogsService.getBaProcessById.mockReturnValue({
         id: "bp-001",
         name: "Requirements Elicitation",
         description: "Gather requirements from stakeholders",
+        category: "discovery",
         phases: ["discovery", "analysis"],
       } as any);
 
       const result = await tool.retrieveBaProcesses(context);
 
       expect(result).toBeDefined();
-      expect(mockCatalogsService.searchBaProcessesRag).toHaveBeenCalledWith(
+      expect(mockRagService.similaritySearch).toHaveBeenCalledWith(
         context,
-        5,
+        expect.objectContaining({ k: 5, filter: { docType: "ba_process" } }),
       );
     });
 
     it("should handle empty BA process results", async () => {
       const context = "non-matching query";
 
-      mockCatalogsService.searchBaProcessesRag.mockResolvedValue({
+      mockRagService.similaritySearch.mockResolvedValue({
         documents: [],
       } as any);
 
@@ -231,7 +233,7 @@ describe("CatalogRetrieverTool", () => {
           { content: "C1", metadata: { id: "c-1", name: "C1" }, score: 0.85 },
         ],
       } as any);
-      mockCatalogsService.searchBaProcessesRag.mockResolvedValue({
+      mockRagService.similaritySearch.mockResolvedValue({
         documents: [
           {
             content: "BP1",
@@ -260,6 +262,7 @@ describe("CatalogRetrieverTool", () => {
         id: "bp-1",
         name: "BP1",
         description: "Test",
+        category: "discovery",
         phases: ["discovery"],
       } as any);
 
@@ -271,7 +274,7 @@ describe("CatalogRetrieverTool", () => {
       expect(result.baProcesses).toBeDefined();
       expect(mockCatalogsService.searchAtomicWorksRag).toHaveBeenCalled();
       expect(mockCatalogsService.searchCoefficientsRag).toHaveBeenCalled();
-      expect(mockCatalogsService.searchBaProcessesRag).toHaveBeenCalled();
+      expect(mockRagService.similaritySearch).toHaveBeenCalled();
     });
 
     it("should use provided options for all searches", async () => {
@@ -284,7 +287,7 @@ describe("CatalogRetrieverTool", () => {
       mockCatalogsService.searchCoefficientsRag.mockResolvedValue({
         documents: [],
       } as any);
-      mockCatalogsService.searchBaProcessesRag.mockResolvedValue({
+      mockRagService.similaritySearch.mockResolvedValue({
         documents: [],
       } as any);
 
@@ -298,9 +301,9 @@ describe("CatalogRetrieverTool", () => {
         context,
         options.limit,
       );
-      expect(mockCatalogsService.searchBaProcessesRag).toHaveBeenCalledWith(
+      expect(mockRagService.similaritySearch).toHaveBeenCalledWith(
         context,
-        options.limit,
+        expect.objectContaining({ k: options.limit }),
       );
     });
 
