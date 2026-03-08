@@ -1,11 +1,11 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import * as fs from 'fs';
-import * as path from 'path';
+import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
+import * as fs from "fs";
+import * as path from "path";
 import {
   AgentType,
   PromptContext,
   PromptTemplate,
-} from './interfaces/prompt-context.interface';
+} from "./interfaces/prompt-context.interface";
 
 /**
  * Service for loading and managing prompt templates for LangGraph agents
@@ -18,7 +18,7 @@ export class PromptsService implements OnModuleInit {
 
   constructor() {
     // Templates directory path relative to dist
-    this.templatesDir = path.join(__dirname, 'templates');
+    this.templatesDir = path.join(__dirname, "templates");
   }
 
   /**
@@ -33,11 +33,11 @@ export class PromptsService implements OnModuleInit {
    */
   private async loadAllTemplates(): Promise<void> {
     const templateFiles: Record<AgentType, string> = {
-      [AgentType.VALIDATION]: 'validation-agent.md',
-      [AgentType.EXTRACTION]: 'extraction-agent.md',
-      [AgentType.DECOMPOSITION]: 'decomposition-agent.md',
-      [AgentType.ESTIMATION]: 'estimation-agent.md',
-      [AgentType.REPORTING]: 'reporting-agent.md',
+      [AgentType.VALIDATION]: "validation-agent.md",
+      [AgentType.EXTRACTION]: "extraction-agent.md",
+      [AgentType.DECOMPOSITION]: "decomposition-agent.md",
+      [AgentType.ESTIMATION]: "estimation-agent.md",
+      [AgentType.REPORTING]: "reporting-agent.md",
     };
 
     for (const [agentType, filename] of Object.entries(templateFiles)) {
@@ -58,7 +58,7 @@ export class PromptsService implements OnModuleInit {
    */
   private async loadTemplateFile(filePath: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      fs.readFile(filePath, 'utf-8', (err, data) => {
+      fs.readFile(filePath, "utf-8", (err, data) => {
         if (err) {
           reject(err);
         } else {
@@ -127,7 +127,10 @@ export class PromptsService implements OnModuleInit {
    * @param context The context object with variables
    * @returns The interpolated string
    */
-  private interpolateTemplate(template: string, context: PromptContext): string {
+  private interpolateTemplate(
+    template: string,
+    context: PromptContext,
+  ): string {
     let result = template;
 
     // Replace simple variable placeholders: {{variableName}}
@@ -138,20 +141,36 @@ export class PromptsService implements OnModuleInit {
         this.logger.warn(`Template variable not found: ${variableName}`);
         return match; // Keep original placeholder if variable not found
       }
-      if (typeof value === 'object') {
-        return JSON.stringify(value, null, 2);
+      if (typeof value === "object") {
+        // Escape curly braces in JSON output to prevent template parsing issues
+        return this.escapeCurlyBraces(JSON.stringify(value, null, 2));
       }
-      return String(value);
+      // Escape curly braces in string values to prevent template parsing issues
+      return this.escapeCurlyBraces(String(value));
     });
 
     return result;
   }
 
   /**
+   * Escape curly braces in content to prevent template parsing issues
+   * LangChain's ChatPromptTemplate interprets { and } as template variables
+   * @param content The content to escape
+   * @returns Content with escaped curly braces
+   */
+  private escapeCurlyBraces(content: string): string {
+    // Replace single { with {{ and single } with }}
+    // This escapes them for LangChain's template parser
+    return content
+      .replace(/(?<!\{)\{(?!\{)/g, "{{")
+      .replace(/(?<!\})\}(?!\})/g, "}}");
+  }
+
+  /**
    * Reload templates from disk (useful for development)
    */
   async reloadTemplates(): Promise<void> {
-    this.logger.log('Reloading all templates...');
+    this.logger.log("Reloading all templates...");
     this.templates.clear();
     await this.loadAllTemplates();
   }
@@ -196,7 +215,12 @@ export class PromptsService implements OnModuleInit {
    */
   createValidationContext(
     inputFolderPath: string,
-    discoveredFiles: Array<{ name: string; path: string; content: string; type: string }>,
+    discoveredFiles: Array<{
+      name: string;
+      path: string;
+      content: string;
+      type: string;
+    }>,
   ): PromptContext {
     return {
       inputFolderPath,
@@ -221,9 +245,9 @@ export class PromptsService implements OnModuleInit {
    * Create a context object for decomposition
    */
   createDecompositionContext(
-    requirements: PromptContext['requirements'],
-    atomicWorksCatalog: PromptContext['atomicWorksCatalog'],
-    baProcessesCatalog: PromptContext['baProcessesCatalog'],
+    requirements: PromptContext["requirements"],
+    atomicWorksCatalog: PromptContext["atomicWorksCatalog"],
+    baProcessesCatalog: PromptContext["baProcessesCatalog"],
   ): PromptContext {
     return {
       requirements,
@@ -236,8 +260,8 @@ export class PromptsService implements OnModuleInit {
    * Create a context object for estimation
    */
   createEstimationContext(
-    decompositionResults: PromptContext['decompositionResults'],
-    atomicWorksCatalog: PromptContext['atomicWorksCatalog'],
+    decompositionResults: PromptContext["decompositionResults"],
+    atomicWorksCatalog: PromptContext["atomicWorksCatalog"],
   ): PromptContext {
     return {
       decompositionResults,
@@ -249,10 +273,10 @@ export class PromptsService implements OnModuleInit {
    * Create a context object for reporting
    */
   createReportingContext(
-    validationResults: PromptContext['validationResults'],
-    requirements: PromptContext['requirements'],
-    decompositionResults: PromptContext['decompositionResults'],
-    estimates: PromptContext['estimates'],
+    validationResults: PromptContext["validationResults"],
+    requirements: PromptContext["requirements"],
+    decompositionResults: PromptContext["decompositionResults"],
+    estimates: PromptContext["estimates"],
     inputFolderPath?: string,
   ): PromptContext {
     return {
