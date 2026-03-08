@@ -12,6 +12,12 @@ export interface ZhipuAIConfig {
   embeddingModel: string;
 }
 
+export interface GeminiConfig {
+  apiKey: string;
+  llmModel: string;
+  embeddingModel: string;
+}
+
 export interface MongoDBConfig {
   uri: string;
   dbName: string;
@@ -28,8 +34,10 @@ export interface LangfuseConfig {
 export interface Config {
   app: AppConfig;
   zhipuai: ZhipuAIConfig;
+  gemini: GeminiConfig;
   mongodb: MongoDBConfig;
   langfuse: LangfuseConfig;
+  llmProvider: string;
 }
 
 export default registerAs(
@@ -46,6 +54,12 @@ export default registerAs(
       llmModel: process.env.LLM_MODEL || "glm-5",
       embeddingModel: process.env.EMBEDDING_MODEL || "embedding-3",
     },
+    gemini: {
+      apiKey: process.env.GEMINI_API_KEY || "",
+      llmModel: process.env.GEMINI_MODEL || "gemini-1.5-flash",
+      embeddingModel:
+        process.env.GEMINI_EMBEDDING_MODEL || "text-embedding-004",
+    },
     mongodb: {
       uri: process.env.MONGODB_URI || "",
       dbName:
@@ -58,5 +72,6 @@ export default registerAs(
       host: process.env.LANGFUSE_HOST || "https://cloud.langfuse.com",
       enabled: process.env.LANGFUSE_ENABLED === "true",
     },
+    llmProvider: process.env.LLM_PROVIDER || "zhipuai",
   }),
 );
