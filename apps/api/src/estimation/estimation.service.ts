@@ -9,11 +9,14 @@ import {
   CreateEstimationResponse,
   GetEstimationResponse,
   EstimationLinks,
+  EstimationErrorType,
+  EstimationErrorDetails,
 } from "./interfaces/estimation-job.interface";
 import { CreateEstimationDto } from "./dto/create-estimation.dto";
 import { AgentsService } from "../agents";
 import { TracingService, MetricsService } from "../observability";
 import { TraceContext } from "../observability/interfaces/trace-context.interface";
+import { LLMError } from "../agents/errors/llm-error";
 
 /**
  * Service for managing estimation jobs
@@ -197,18 +200,24 @@ export class EstimationService {
       const errorObj = error instanceof Error ? error : new Error(errorMessage);
       this.logger.error(`Estimation ${id} failed:`, errorMessage);
 
+      // Classify error type and create detailed error info
+      const errorDetails = this.classifyError(error);
+
       job.status = EstimationStatus.FAILED;
       job.error = errorMessage;
+      job.errorDetails = errorDetails;
       job.completedAt = new Date();
       this.jobs.set(id, job);
 
       // Record error in trace and metrics
       this.tracingService.recordTraceError(traceContext, errorObj, {
         stage: "estimation",
+        errorType: errorDetails.type,
       });
       this.tracingService.endEstimationTrace(traceContext, {
         success: false,
         error: errorMessage,
+        errorType: errorDetails.type,
       });
 
       metricsBuilder
@@ -253,6 +262,131 @@ export class EstimationService {
   }
 
   /**
+   * Classify error type and create detailed error information
+   * @param error - The error to classify
+   * @returns Detailed error information with classification
+   */
+  private classifyError(error: unknown): EstimationErrorDetails {
+    const timestamp = new Date().toISOString();
+
+    // Check for LLMError first (most specific)
+    if (LLMError.isLLMError(error)) {
+      return {
+        type: EstimationErrorType.LLM_FAILURE,
+        message: error.message,
+        node: error.context?.node,
+        stack: error.stack,
+        retryable: error.isRetryable(),
+        timestamp,
+      };
+    }
+
+    // Check for common error patterns
+    if (error instanceof Error) {
+      const message = error.message.toLowerCase();
+      const errorName = error.constructor.name.toLowerCase();
+
+      // LLM-related errors (rate limits, API errors, etc.)
+      if (
+        message.includes("rate limit") ||
+        message.includes("too many requests") ||
+        message.includes("api key") ||
+        message.includes("authentication") ||
+        message.includes("openai") ||
+        message.includes("anthropic") ||
+        message.includes("llm") ||
+        errorName.includes("llm") ||
+        errorName.includes("openai") ||
+        errorName.includes("anthropic")
+      ) {
+        return {
+          type: EstimationErrorType.LLM_FAILURE,
+          message: error.message,
+          stack: error.stack,
+          retryable:
+            message.includes("rate limit") ||
+            message.includes("too many requests"),
+          timestamp,
+        };
+      }
+
+      // File I/O errors
+      if (
+        message.includes("enoent") ||
+        message.includes("eacces") ||
+        message.includes("permission") ||
+        message.includes("file not found") ||
+        message.includes("directory") ||
+        errorName.includes("file") ||
+        errorName.includes("io")
+      ) {
+        return {
+          type: EstimationErrorType.IO_ERROR,
+          message: error.message,
+          stack: error.stack,
+          timestamp,
+        };
+      }
+
+      // Validation errors
+      if (
+        message.includes("validation") ||
+        message.includes("invalid") ||
+        message.includes("required") ||
+        errorName.includes("validation")
+      ) {
+        return {
+          type: EstimationErrorType.VALIDATION_ERROR,
+          message: error.message,
+          stack: error.stack,
+          timestamp,
+        };
+      }
+
+      // Parse errors
+      if (
+        message.includes("json") ||
+        message.includes("parse") ||
+        message.includes("syntax") ||
+        errorName.includes("syntax") ||
+        errorName.includes("parse")
+      ) {
+        return {
+          type: EstimationErrorType.PARSE_ERROR,
+          message: error.message,
+          stack: error.stack,
+          timestamp,
+        };
+      }
+
+      // RAG errors
+      if (
+        message.includes("embedding") ||
+        message.includes("vector") ||
+        message.includes("retrieval") ||
+        message.includes("rag") ||
+        message.includes("mongodb") ||
+        message.includes("database")
+      ) {
+        return {
+          type: EstimationErrorType.RAG_ERROR,
+          message: error.message,
+          stack: error.stack,
+          timestamp,
+        };
+      }
+    }
+
+    // Default to unknown error type
+    return {
+      type: EstimationErrorType.UNKNOWN,
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp,
+    };
+  }
+
+  /**
    * Get all estimation jobs (for admin/debug purposes)
    */
   async getAllEstimations(): Promise<GetEstimationResponse[]> {
@@ -266,6 +400,7 @@ export class EstimationService {
         completedAt: job.completedAt?.toISOString(),
         summary: job.summary,
         error: job.error,
+        errorDetails: job.errorDetails,
       });
     }
 

@@ -22,6 +22,7 @@ import {
   ParseConfig,
 } from "../interfaces/agent.interface";
 import { LangfuseSpanClient } from "langfuse-core";
+import { LLMError } from "../errors/llm-error";
 
 /**
  * Extended agent dependencies including tracing service
@@ -133,7 +134,11 @@ export abstract class BaseAgentNode implements AgentNode {
         metadata: { duration },
       });
 
-      throw error;
+      // Wrap error in LLMError for proper classification
+      throw LLMError.fromError(error, {
+        node: this.name,
+        operation: "invoke",
+      });
     }
   }
 

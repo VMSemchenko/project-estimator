@@ -9,6 +9,52 @@ export enum EstimationStatus {
 }
 
 /**
+ * Error type classification for failed estimations
+ */
+export enum EstimationErrorType {
+  /** LLM API call failed (rate limit, timeout, API error, etc.) */
+  LLM_FAILURE = "llm_failure",
+
+  /** Input/output file operations failed */
+  IO_ERROR = "io_error",
+
+  /** Validation of input artifacts failed */
+  VALIDATION_ERROR = "validation_error",
+
+  /** JSON parsing or response format error */
+  PARSE_ERROR = "parse_error",
+
+  /** RAG retrieval failed */
+  RAG_ERROR = "rag_error",
+
+  /** Unknown/unexpected error */
+  UNKNOWN = "unknown",
+}
+
+/**
+ * Detailed error information for failed estimations
+ */
+export interface EstimationErrorDetails {
+  /** Classification of the error type */
+  type: EstimationErrorType;
+
+  /** Human-readable error message */
+  message: string;
+
+  /** Node where the error occurred */
+  node?: string;
+
+  /** Original error stack trace */
+  stack?: string;
+
+  /** Whether this error is potentially retryable */
+  retryable?: boolean;
+
+  /** Timestamp when the error occurred */
+  timestamp?: string;
+}
+
+/**
  * Confidence level for estimation results
  */
 export enum ConfidenceLevel {
@@ -59,7 +105,10 @@ export interface EstimationJob {
   completedAt?: Date;
   summary?: EstimationSummary;
   artifacts?: EstimationArtifacts;
+  /** @deprecated Use errorDetails instead */
   error?: string;
+  /** Detailed error information including type classification */
+  errorDetails?: EstimationErrorDetails;
 }
 
 /**
@@ -92,5 +141,8 @@ export interface GetEstimationResponse {
   completedAt?: string;
   summary?: EstimationSummary;
   artifacts?: EstimationArtifacts;
+  /** @deprecated Use errorDetails instead */
   error?: string;
+  /** Detailed error information including type classification */
+  errorDetails?: EstimationErrorDetails;
 }
