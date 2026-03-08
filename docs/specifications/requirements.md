@@ -26,10 +26,10 @@
 - **Observability_Dashboard**: Дашборд спостережуваності — структурований файл з метриками та трасуванням виконання агентів
 - **Middle_BA**: Мідл БА — бізнес-аналітик середнього рівня (2-4 роки досвіду)
 - **Descoping**: Дископінг — процес виключення або зменшення обсягу вимог
-- **Test_Mode**: Тестовий режим — режим роботи системи з економною моделлю (gpt-5-nano) для розробки та налагодження
-- **Production_Mode**: Продуктивний режим — режим роботи системи з потужною моделлю (gpt-5.2) для реальних оцінок
-- **GPT_5_2**: gpt-5.2 — найпотужніша модель OpenAI для складних задач бізнес-аналізу (продуктивний режим)
-- **GPT_5_Nano**: gpt-5-nano — економна модель OpenAI для тестування та розробки (тестовий режим)
+- **Test_Mode**: Тестовий режим — режим роботи системи з економною моделлю для розробки та налагодження
+- **Production_Mode**: Продуктивний режим — режим роботи системи з потужною моделлю для реальних оцінок
+- **GLM_5**: GLM-5 — модель ZhipuAI для складних задач бізнес-аналізу (продуктивний режим)
+- **ZhipuAI**: ZhipuAI — провайдер LLM з OpenAI-сумісним API (використовується для оцінювання)
 
 ## Requirements
 
@@ -438,7 +438,6 @@
 6. IF mixed languages are detected, THE BA_Estimation_System SHALL use primary language from BV
 7. THE BA_Estimation_System SHALL document language support in user guide
 
-
 ### Requirement 24: Observability агентів
 
 **User Story:** Як користувач або розробник, я хочу мати повну видимість роботи агентів, щоб розуміти процес оцінювання, діагностувати проблеми та оптимізувати продуктивність.
@@ -469,16 +468,19 @@
 9. THE observability data SHALL be stored in `observability/` subfolder with timestamp
 10. THE BA_Estimation_System SHALL provide observability data in JSON format for integration with monitoring tools
 11. THE BA_Estimation_System SHALL track data flow between agents:
-   - Input size (characters/tokens)
-   - Output size (characters/tokens)
-   - Data transformation summary
+
+- Input size (characters/tokens)
+- Output size (characters/tokens)
+- Data transformation summary
+
 12. THE BA_Estimation_System SHALL detect and report anomalies:
-   - Agent taking significantly longer than expected
-   - Unusually high token usage
-   - Repeated failures or retries
+
+- Agent taking significantly longer than expected
+- Unusually high token usage
+- Repeated failures or retries
+
 13. THE BA_Estimation_System SHALL support exporting observability data to common formats (JSON, CSV)
 14. THE observability system SHALL have minimal performance impact (< 5% overhead)
-
 
 ### Requirement 25: Тестовий та продуктивний режими роботи
 
@@ -487,17 +489,17 @@
 #### Acceptance Criteria
 
 1. THE BA_Estimation_System SHALL support two execution modes: test mode and production mode
-2. THE BA_Estimation_System SHALL use `gpt-5.2` model by default (production mode)
+2. THE BA_Estimation_System SHALL use `glm-5` model by default (production mode)
 3. THE BA_Estimation_System SHALL support `--test-mode` command-line flag to enable test mode
-4. WHEN `--test-mode` flag is provided, THE BA_Estimation_System SHALL use `gpt-5-nano` model
-5. THE BA_Estimation_System SHALL allow model configuration via `OPENAI_MODEL` environment variable
+4. WHEN `--test-mode` flag is provided, THE BA_Estimation_System SHALL use a lighter model configuration
+5. THE BA_Estimation_System SHALL allow model configuration via `LLM_MODEL` environment variable
 6. THE BA_Estimation_System SHALL display which model is being used at the start of execution
 7. THE BA_Estimation_System SHALL include model name in all intermediate files and final reports
 8. THE BA_Estimation_System SHALL track token costs separately for test and production modes
 9. THE observability dashboard SHALL include model name and estimated cost per execution
 10. THE BA_Estimation_System SHALL document model selection in traceability section of reports
-11. WHEN test mode is used, THE Estimation_Report SHALL include disclaimer: "Generated using test mode (gpt-5-nano). For production estimates, run without --test-mode flag."
-12. THE BA_Estimation_System SHALL validate that selected model is available via OpenAI API before starting estimation
+11. WHEN test mode is used, THE Estimation_Report SHALL include disclaimer: "Generated using test mode. For production estimates, run without --test-mode flag."
+12. THE BA_Estimation_System SHALL validate that selected model is available via ZhipuAI API before starting estimation
 13. IF selected model is not available, THE BA_Estimation_System SHALL return clear error message with available alternatives
 14. THE BA_Estimation_System SHALL log model selection and reasoning in execution logs
 15. THE user guide SHALL explain differences between test and production modes and when to use each
