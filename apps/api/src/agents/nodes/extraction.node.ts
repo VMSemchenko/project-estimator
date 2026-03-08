@@ -1,18 +1,22 @@
-import { AgentType, PromptContext, NormalizedRequirement } from '../../prompts/interfaces/prompt-context.interface';
-import { BaseAgentNode } from '../base/base-agent';
+import {
+  AgentType,
+  PromptContext,
+  NormalizedRequirement,
+} from "../../prompts/interfaces/prompt-context.interface";
+import { BaseAgentNode } from "../base/base-agent";
 import {
   EstimationState,
   NodeConfig,
   StateUpdate,
-} from '../interfaces/agent-state.interface';
-import { AgentDependencies } from '../interfaces/agent.interface';
+} from "../interfaces/agent-state.interface";
+import { AgentDependencies } from "../interfaces/agent.interface";
 
 /**
  * Extraction node for the LangGraph estimation pipeline
  * Extracts and normalizes requirements from ShRD document
  */
 export class ExtractionNode extends BaseAgentNode {
-  readonly name = 'extraction';
+  readonly name = "extraction";
   readonly agentType = AgentType.EXTRACTION;
 
   constructor(dependencies: AgentDependencies) {
@@ -22,16 +26,19 @@ export class ExtractionNode extends BaseAgentNode {
   /**
    * Execute extraction logic
    */
-  async execute(state: EstimationState, config?: NodeConfig): Promise<StateUpdate> {
+  async execute(
+    state: EstimationState,
+    config?: NodeConfig,
+  ): Promise<StateUpdate> {
     const startTime = this.logStart(state);
 
     try {
       // Validate required state
-      this.validateState(state, ['artifacts', 'validationStatus']);
+      this.validateState(state, ["artifacts", "validationStatus"]);
 
       // Check if validation passed
-      if (state.validationStatus === 'invalid') {
-        this.logger.warn('Skipping extraction due to failed validation');
+      if (state.validationStatus === "invalid") {
+        this.logger.warn("Skipping extraction due to failed validation");
         return {
           requirements: [],
           currentStep: this.name,
@@ -41,7 +48,7 @@ export class ExtractionNode extends BaseAgentNode {
       // Step 1: Find the ShRD document
       const shrdDocument = this.findShRDDocument(state.artifacts);
       if (!shrdDocument) {
-        throw new Error('ShRD document not found in artifacts');
+        throw new Error("ShRD document not found in artifacts");
       }
 
       // Step 2: Use LLM to extract requirements
@@ -56,7 +63,9 @@ export class ExtractionNode extends BaseAgentNode {
         shrdDocument.name,
       );
 
-      this.logger.log(`Extracted ${normalizedRequirements.length} requirements`);
+      this.logger.log(
+        `Extracted ${normalizedRequirements.length} requirements`,
+      );
 
       const update: StateUpdate = {
         requirements: normalizedRequirements,
@@ -71,17 +80,22 @@ export class ExtractionNode extends BaseAgentNode {
   /**
    * Find the ShRD document from artifacts
    */
-  private findShRDDocument(artifacts: EstimationState['artifacts']): EstimationState['artifacts'][0] | null {
+  private findShRDDocument(
+    artifacts: EstimationState["artifacts"],
+  ): EstimationState["artifacts"][0] | null {
     // Look for ShRD by type
-    const shrd = artifacts.find((a) => a.type === 'ShRD');
+    const shrd = artifacts.find((a) => a.type === "ShRD");
     if (shrd) return shrd;
 
     // Fallback: look by filename patterns
-    return artifacts.find((a) => 
-      /stakeholder\s*requirements/i.test(a.name) ||
-      /shrd/i.test(a.name) ||
-      /requirements\.md$/i.test(a.name)
-    ) || null;
+    return (
+      artifacts.find(
+        (a) =>
+          /stakeholder\s*requirements/i.test(a.name) ||
+          /shrd/i.test(a.name) ||
+          /requirements\.md$/i.test(a.name),
+      ) || null
+    );
   }
 
   /**
@@ -91,25 +105,61 @@ export class ExtractionNode extends BaseAgentNode {
     documentContent: string,
     state: EstimationState,
   ): Promise<Partial<NormalizedRequirement>[]> {
+    // Find Business Vision document for context
+    const businessVisionDoc = this.findBusinessVisionDocument(state.artifacts);
+
     // Build context for LLM
     const context: PromptContext = {
       documentContent: documentContent.substring(0, 50000), // Limit content size
       stakeholderRequirements: documentContent.substring(0, 50000),
+      businessVision:
+        businessVisionDoc?.content.substring(0, 50000) || "Not available",
     };
 
     try {
       // Invoke LLM for requirement extraction
-      const response = await this.invokeLLMJson<{
-        requirements: Partial<NormalizedRequirement>[];
-      }>(context, {
-        defaultValue: { requirements: [] },
-      });
+      // The prompt template returns a direct array of requirements, not wrapped in an object
+      const response = await this.invokeLLMJson<Partial<NormalizedRequirement>[]>(
+        context,
+        {
+          defaultValue: [],
+        },
+      );
 
-      return response.requirements;
+      // Ensure response is a valid array
+      if (!response || !Array.isArray(response)) {
+        this.logger.warn(
+          "LLM response is not a valid requirements array, returning empty array",
+        );
+        return [];
+      }
+
+      return response;
     } catch (error) {
       this.logger.error(`Failed to extract requirements: ${error}`);
       throw error;
     }
+  }
+
+  /**
+   * Find the Business Vision document from artifacts
+   */
+  private findBusinessVisionDocument(
+    artifacts: EstimationState["artifacts"],
+  ): EstimationState["artifacts"][0] | null {
+    // Look for BV by type
+    const bv = artifacts.find((a) => a.type === "BV");
+    if (bv) return bv;
+
+    // Fallback: look by filename patterns
+    return (
+      artifacts.find(
+        (a) =>
+          /business\s*vision/i.test(a.name) ||
+          /bv/i.test(a.name) ||
+          /vision\.md$/i.test(a.name),
+      ) || null
+    );
   }
 
   /**
@@ -125,8 +175,8 @@ export class ExtractionNode extends BaseAgentNode {
       return {
         id,
         title: req.title || `Requirement ${index + 1}`,
-        description: req.description || req.originalText || '',
-        originalText: req.originalText || req.description || '',
+        description: req.description || req.originalText || "",
+        originalText: req.originalText || req.description || "",
         type: this.normalizeRequirementType(req.type),
         acceptanceCriteria: req.acceptanceCriteria || [],
         priority: this.normalizePriority(req.priority),
@@ -139,7 +189,7 @@ export class ExtractionNode extends BaseAgentNode {
    * Generate a requirement ID
    */
   private generateRequirementId(index: number): string {
-    return `REQ-${String(index + 1).padStart(3, '0')}`;
+    return `REQ-${String(index + 1).padStart(3, "0")}`;
   }
 
   /**
@@ -147,17 +197,20 @@ export class ExtractionNode extends BaseAgentNode {
    */
   private normalizeRequirementType(
     type: string | undefined,
-  ): 'functional' | 'non-functional' | 'constraint' {
-    if (!type) return 'functional';
+  ): "functional" | "non-functional" | "constraint" {
+    if (!type) return "functional";
 
     const typeLower = type.toLowerCase();
-    if (typeLower.includes('non-functional') || typeLower.includes('nonfunctional')) {
-      return 'non-functional';
+    if (
+      typeLower.includes("non-functional") ||
+      typeLower.includes("nonfunctional")
+    ) {
+      return "non-functional";
     }
-    if (typeLower.includes('constraint') || typeLower.includes('limitation')) {
-      return 'constraint';
+    if (typeLower.includes("constraint") || typeLower.includes("limitation")) {
+      return "constraint";
     }
-    return 'functional';
+    return "functional";
   }
 
   /**
@@ -165,24 +218,34 @@ export class ExtractionNode extends BaseAgentNode {
    */
   private normalizePriority(
     priority: string | undefined,
-  ): 'high' | 'medium' | 'low' {
-    if (!priority) return 'medium';
+  ): "high" | "medium" | "low" {
+    if (!priority) return "medium";
 
     const priorityLower = priority.toLowerCase();
-    if (priorityLower.includes('high') || priorityLower.includes('critical') || priorityLower.includes('must')) {
-      return 'high';
+    if (
+      priorityLower.includes("high") ||
+      priorityLower.includes("critical") ||
+      priorityLower.includes("must")
+    ) {
+      return "high";
     }
-    if (priorityLower.includes('low') || priorityLower.includes('nice') || priorityLower.includes('optional')) {
-      return 'low';
+    if (
+      priorityLower.includes("low") ||
+      priorityLower.includes("nice") ||
+      priorityLower.includes("optional")
+    ) {
+      return "low";
     }
-    return 'medium';
+    return "medium";
   }
 }
 
 /**
  * Factory function to create extraction node
  */
-export function createExtractionNode(dependencies: AgentDependencies): ExtractionNode {
+export function createExtractionNode(
+  dependencies: AgentDependencies,
+): ExtractionNode {
   return new ExtractionNode(dependencies);
 }
 
@@ -195,5 +258,7 @@ export async function extractionNode(
 ): Promise<StateUpdate> {
   // This is a placeholder - in actual implementation, the node instance
   // would be created by the module and injected
-  throw new Error('ExtractionNode must be created via factory with dependencies');
+  throw new Error(
+    "ExtractionNode must be created via factory with dependencies",
+  );
 }

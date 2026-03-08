@@ -82,6 +82,16 @@ export class CatalogsService implements OnModuleInit {
     this.logger.log('Indexing catalogs into vector store...');
 
     try {
+      // Check if catalogs are already indexed by counting existing documents
+      const existingCount = await this.ragService.getDocumentCount();
+      if (existingCount > 0) {
+        this.logger.log(
+          `Vector store already contains ${existingCount} documents, skipping indexing`,
+        );
+        this.isIndexed = true;
+        return;
+      }
+
       // Index atomic works
       const atomicWorkDocs = this.atomicWorksLoader.toDocuments();
       await this.indexDocuments(atomicWorkDocs, 'atomic_work');
