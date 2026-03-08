@@ -1,13 +1,19 @@
-import { Module, OnModuleInit, Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { AiModule } from '../ai/ai.module';
-import { PromptsModule } from '../prompts/prompts.module';
-import { RagModule } from '../rag/rag.module';
-import { PromptsService } from '../prompts/prompts.service';
-import { LangchainLLMProvider } from '../ai/providers/langchain-llm.provider';
-import { LangfuseService } from '../ai/langfuse/langfuse.service';
-import { RagService } from '../rag/rag.service';
-import { Config } from '../config/configuration';
+import {
+  Module,
+  OnModuleInit,
+  Injectable,
+  Logger,
+  Inject,
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { AiModule } from "../ai/ai.module";
+import { PromptsModule } from "../prompts/prompts.module";
+import { RagModule } from "../rag/rag.module";
+import { PromptsService } from "../prompts/prompts.service";
+import { LangchainLLMProvider } from "../ai/providers/langchain-llm.provider";
+import { LangfuseService } from "../ai/langfuse/langfuse.service";
+import { RagService } from "../rag/rag.service";
+import { Config } from "../config/configuration";
 
 import {
   ValidationNode,
@@ -20,16 +26,19 @@ import {
   createDecompositionNode,
   createEstimationNode,
   createReportingNode,
-} from './nodes';
-import { AgentDependencies } from './interfaces/agent.interface';
+} from "./nodes";
+import { AgentDependencies } from "./interfaces/agent.interface";
 import {
   EstimationState,
   createInitialState,
   StateUpdate,
   EstimationReport,
-} from './interfaces/agent-state.interface';
-import { PipelineResult, PipelineSummary } from './interfaces/agent-result.interface';
-import { TraceContext } from '../observability/interfaces/trace-context.interface';
+} from "./interfaces/agent-state.interface";
+import {
+  PipelineResult,
+  PipelineSummary,
+} from "./interfaces/agent-result.interface";
+import { TraceContext } from "../observability/interfaces/trace-context.interface";
 import {
   createEstimationGraph,
   executeEstimationGraph,
@@ -37,7 +46,7 @@ import {
   EstimationGraph,
   GraphState,
   GraphExecutionOptions,
-} from './graph';
+} from "./graph";
 
 /**
  * Service for orchestrating agent node execution
@@ -47,11 +56,12 @@ export class AgentsService {
   private readonly logger = new Logger(AgentsService.name);
 
   constructor(
-    private readonly validationNode: ValidationNode,
-    private readonly extractionNode: ExtractionNode,
+    @Inject("VALIDATION_NODE") private readonly validationNode: ValidationNode,
+    @Inject("EXTRACTION_NODE") private readonly extractionNode: ExtractionNode,
+    @Inject("DECOMPOSITION_NODE")
     private readonly decompositionNode: DecompositionNode,
-    private readonly estimationNode: EstimationNode,
-    private readonly reportingNode: ReportingNode,
+    @Inject("ESTIMATION_NODE") private readonly estimationNode: EstimationNode,
+    @Inject("REPORTING_NODE") private readonly reportingNode: ReportingNode,
   ) {}
 
   /**
@@ -71,35 +81,35 @@ export class AgentsService {
     if (traceContext) {
       state.traceContext = traceContext;
     }
-    const nodeResults: PipelineResult['nodeResults'] = [];
+    const nodeResults: PipelineResult["nodeResults"] = [];
 
     try {
       // Step 1: Validation
-      this.logger.log('Running validation node...');
+      this.logger.log("Running validation node...");
       const validationResult = await this.validationNode.execute(state);
       nodeResults.push({
         success: !validationResult.shouldStop,
         stateUpdate: validationResult,
         errors: validationResult.errors || [],
         duration: 0,
-        nodeName: 'validation',
+        nodeName: "validation",
       });
       state = this.mergeState(state, validationResult);
 
       if (state.shouldStop) {
-        this.logger.warn('Pipeline stopped after validation');
+        this.logger.warn("Pipeline stopped after validation");
         return this.createPipelineResult(state, nodeResults, startTime);
       }
 
       // Step 2: Extraction
-      this.logger.log('Running extraction node...');
+      this.logger.log("Running extraction node...");
       const extractionResult = await this.extractionNode.execute(state);
       nodeResults.push({
         success: true,
         stateUpdate: extractionResult,
         errors: [],
         duration: 0,
-        nodeName: 'extraction',
+        nodeName: "extraction",
       });
       state = this.mergeState(state, extractionResult);
 
@@ -108,14 +118,14 @@ export class AgentsService {
       }
 
       // Step 3: Decomposition
-      this.logger.log('Running decomposition node...');
+      this.logger.log("Running decomposition node...");
       const decompositionResult = await this.decompositionNode.execute(state);
       nodeResults.push({
         success: true,
         stateUpdate: decompositionResult,
         errors: [],
         duration: 0,
-        nodeName: 'decomposition',
+        nodeName: "decomposition",
       });
       state = this.mergeState(state, decompositionResult);
 
@@ -124,14 +134,14 @@ export class AgentsService {
       }
 
       // Step 4: Estimation
-      this.logger.log('Running estimation node...');
+      this.logger.log("Running estimation node...");
       const estimationResult = await this.estimationNode.execute(state);
       nodeResults.push({
         success: true,
         stateUpdate: estimationResult,
         errors: [],
         duration: 0,
-        nodeName: 'estimation',
+        nodeName: "estimation",
       });
       state = this.mergeState(state, estimationResult);
 
@@ -140,14 +150,14 @@ export class AgentsService {
       }
 
       // Step 5: Reporting
-      this.logger.log('Running reporting node...');
+      this.logger.log("Running reporting node...");
       const reportingResult = await this.reportingNode.execute(state);
       nodeResults.push({
         success: true,
         stateUpdate: reportingResult,
         errors: [],
         duration: 0,
-        nodeName: 'reporting',
+        nodeName: "reporting",
       });
       state = this.mergeState(state, reportingResult);
 
@@ -157,14 +167,14 @@ export class AgentsService {
       return this.createPipelineResult(state, nodeResults, startTime);
     } catch (error) {
       this.logger.error(`Pipeline failed: ${error}`);
-      
+
       const errorState: EstimationState = {
         ...state,
         errors: [
           ...state.errors,
           {
             timestamp: new Date().toISOString(),
-            node: 'pipeline',
+            node: "pipeline",
             message: error instanceof Error ? error.message : String(error),
             stack: error instanceof Error ? error.stack : undefined,
           },
@@ -184,15 +194,15 @@ export class AgentsService {
     state: EstimationState,
   ): Promise<StateUpdate> {
     switch (nodeName) {
-      case 'validation':
+      case "validation":
         return this.validationNode.execute(state);
-      case 'extraction':
+      case "extraction":
         return this.extractionNode.execute(state);
-      case 'decomposition':
+      case "decomposition":
         return this.decompositionNode.execute(state);
-      case 'estimation':
+      case "estimation":
         return this.estimationNode.execute(state);
-      case 'reporting':
+      case "reporting":
         return this.reportingNode.execute(state);
       default:
         throw new Error(`Unknown node: ${nodeName}`);
@@ -217,7 +227,9 @@ export class AgentsService {
       ...state,
       ...update,
       // Merge arrays instead of replacing
-      errors: update.errors ? [...state.errors, ...update.errors] : state.errors,
+      errors: update.errors
+        ? [...state.errors, ...update.errors]
+        : state.errors,
     };
   }
 
@@ -226,7 +238,7 @@ export class AgentsService {
    */
   private createPipelineResult(
     state: EstimationState,
-    nodeResults: PipelineResult['nodeResults'],
+    nodeResults: PipelineResult["nodeResults"],
     startTime: number,
   ): PipelineResult {
     const totalDuration = Date.now() - startTime;
@@ -237,7 +249,7 @@ export class AgentsService {
       atomicWorksIdentified: state.atomicWorks.length,
       estimatesGenerated: state.estimates.length,
       totalEstimatedHours: state.report?.totalHours || 0,
-      validationPassed: state.validationStatus === 'valid',
+      validationPassed: state.validationStatus === "valid",
       reportGenerated: !!state.report,
     };
 
@@ -268,7 +280,7 @@ export class GraphService {
    */
   private getGraph(): EstimationGraph {
     if (!this.graph) {
-      this.logger.log('Initializing estimation graph...');
+      this.logger.log("Initializing estimation graph...");
       this.graph = createEstimationGraph(this.agentDependencies);
     }
     return this.graph;
@@ -282,7 +294,7 @@ export class GraphService {
    */
   async runEstimation(
     inputFolder: string,
-    options?: GraphExecutionOptions
+    options?: GraphExecutionOptions,
   ): Promise<GraphState> {
     this.logger.log(`Starting LangGraph estimation for: ${inputFolder}`);
     const startTime = Date.now();
@@ -296,7 +308,8 @@ export class GraphService {
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       this.logger.error(`LangGraph estimation failed: ${errorMessage}`);
       throw error;
     }
@@ -310,7 +323,7 @@ export class GraphService {
    */
   async *streamEstimation(
     inputFolder: string,
-    options?: GraphExecutionOptions
+    options?: GraphExecutionOptions,
   ): AsyncGenerator<{ node: string; state: GraphState }> {
     this.logger.log(`Starting LangGraph stream estimation for: ${inputFolder}`);
 
@@ -351,7 +364,7 @@ export class GraphService {
       atomicWorksIdentified: state.atomicWorks.length,
       estimatesGenerated: state.estimates.length,
       totalEstimatedHours: state.report?.totalHours || 0,
-      validationPassed: state.validationStatus === 'valid',
+      validationPassed: state.validationStatus === "valid",
       reportGenerated: !!state.report,
       errorCount: state.errors.length,
     };
@@ -366,33 +379,33 @@ export class GraphService {
   providers: [
     // Node providers
     {
-      provide: 'VALIDATION_NODE',
+      provide: "VALIDATION_NODE",
       useFactory: (deps: AgentDependencies) => createValidationNode(deps),
-      inject: ['AGENT_DEPENDENCIES'],
+      inject: ["AGENT_DEPENDENCIES"],
     },
     {
-      provide: 'EXTRACTION_NODE',
+      provide: "EXTRACTION_NODE",
       useFactory: (deps: AgentDependencies) => createExtractionNode(deps),
-      inject: ['AGENT_DEPENDENCIES'],
+      inject: ["AGENT_DEPENDENCIES"],
     },
     {
-      provide: 'DECOMPOSITION_NODE',
+      provide: "DECOMPOSITION_NODE",
       useFactory: (deps: AgentDependencies) => createDecompositionNode(deps),
-      inject: ['AGENT_DEPENDENCIES'],
+      inject: ["AGENT_DEPENDENCIES"],
     },
     {
-      provide: 'ESTIMATION_NODE',
+      provide: "ESTIMATION_NODE",
       useFactory: (deps: AgentDependencies) => createEstimationNode(deps),
-      inject: ['AGENT_DEPENDENCIES'],
+      inject: ["AGENT_DEPENDENCIES"],
     },
     {
-      provide: 'REPORTING_NODE',
+      provide: "REPORTING_NODE",
       useFactory: (deps: AgentDependencies) => createReportingNode(deps),
-      inject: ['AGENT_DEPENDENCIES'],
+      inject: ["AGENT_DEPENDENCIES"],
     },
     // Agent dependencies provider
     {
-      provide: 'AGENT_DEPENDENCIES',
+      provide: "AGENT_DEPENDENCIES",
       useFactory: (
         promptsService: PromptsService,
         llmProvider: LangchainLLMProvider,
@@ -404,26 +417,36 @@ export class GraphService {
         ragService,
         langfuseService,
       }),
-      inject: [PromptsService, LangchainLLMProvider, RagService, LangfuseService],
+      inject: [
+        PromptsService,
+        LangchainLLMProvider,
+        RagService,
+        LangfuseService,
+      ],
     },
     // Graph service provider
     {
-      provide: 'GRAPH_SERVICE',
+      provide: "GRAPH_SERVICE",
       useFactory: (deps: AgentDependencies) => new GraphService(deps),
-      inject: ['AGENT_DEPENDENCIES'],
+      inject: ["AGENT_DEPENDENCIES"],
+    },
+    // GraphService class provider (uses AGENT_DEPENDENCIES token)
+    {
+      provide: GraphService,
+      useFactory: (deps: AgentDependencies) => new GraphService(deps),
+      inject: ["AGENT_DEPENDENCIES"],
     },
     AgentsService,
-    GraphService,
   ],
   exports: [
     AgentsService,
     GraphService,
-    'VALIDATION_NODE',
-    'EXTRACTION_NODE',
-    'DECOMPOSITION_NODE',
-    'ESTIMATION_NODE',
-    'REPORTING_NODE',
-    'GRAPH_SERVICE',
+    "VALIDATION_NODE",
+    "EXTRACTION_NODE",
+    "DECOMPOSITION_NODE",
+    "ESTIMATION_NODE",
+    "REPORTING_NODE",
+    "GRAPH_SERVICE",
   ],
 })
 export class AgentsModule implements OnModuleInit {

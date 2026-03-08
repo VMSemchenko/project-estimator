@@ -1,20 +1,27 @@
-import { Logger } from '@nestjs/common';
-import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { StringOutputParser } from '@langchain/core/output_parsers';
-import { RunnableSequence } from '@langchain/core/runnables';
-import { AgentType, PromptContext } from '../../prompts/interfaces/prompt-context.interface';
-import { PromptsService } from '../../prompts/prompts.service';
-import { LLMProvider } from '../../ai/interfaces/llm-provider.interface';
-import { LangfuseService } from '../../ai/langfuse/langfuse.service';
-import { TracingService } from '../../observability/tracing.service';
+import { Logger } from "@nestjs/common";
+import { StringOutputParser } from "@langchain/core/output_parsers";
+import { RunnableSequence } from "@langchain/core/runnables";
+import { HumanMessage } from "@langchain/core/messages";
+import {
+  AgentType,
+  PromptContext,
+} from "../../prompts/interfaces/prompt-context.interface";
+import { PromptsService } from "../../prompts/prompts.service";
+import { LLMProvider } from "../../ai/interfaces/llm-provider.interface";
+import { LangfuseService } from "../../ai/langfuse/langfuse.service";
+import { TracingService } from "../../observability/tracing.service";
 import {
   EstimationState,
   EstimationError,
   NodeConfig,
   StateUpdate,
-} from '../interfaces/agent-state.interface';
-import { AgentNode, AgentDependencies, ParseConfig } from '../interfaces/agent.interface';
-import { LangfuseSpanClient } from 'langfuse-core';
+} from "../interfaces/agent-state.interface";
+import {
+  AgentNode,
+  AgentDependencies,
+  ParseConfig,
+} from "../interfaces/agent.interface";
+import { LangfuseSpanClient } from "langfuse-core";
 
 /**
  * Extended agent dependencies including tracing service
@@ -48,7 +55,10 @@ export abstract class BaseAgentNode implements AgentNode {
   /**
    * Execute the node's logic - must be implemented by subclasses
    */
-  abstract execute(state: EstimationState, config?: NodeConfig): Promise<StateUpdate>;
+  abstract execute(
+    state: EstimationState,
+    config?: NodeConfig,
+  ): Promise<StateUpdate>;
 
   /**
    * Create an error object for state tracking
@@ -78,7 +88,10 @@ export abstract class BaseAgentNode implements AgentNode {
     const startTime = Date.now();
 
     // Compile the prompt template with context
-    const compiledPrompt = this.promptsService.compileTemplate(this.agentType, context);
+    const compiledPrompt = this.promptsService.compileTemplate(
+      this.agentType,
+      context,
+    );
 
     // Create Langfuse trace if enabled
     const trace = this.langfuseService?.createTrace({
@@ -89,12 +102,10 @@ export abstract class BaseAgentNode implements AgentNode {
     try {
       const chatModel = this.llmProvider.getChatModel();
 
-      // Create prompt template
-      const promptTemplate = ChatPromptTemplate.fromTemplate(compiledPrompt);
-
-      // Build the chain
+      // Build the chain with a lambda that returns the compiled prompt as a HumanMessage
+      // This avoids ChatPromptTemplate interpreting curly braces in the prompt as variables
       const chain = RunnableSequence.from([
-        promptTemplate,
+        () => [new HumanMessage(compiledPrompt)],
         chatModel,
         new StringOutputParser(),
       ]);
@@ -107,7 +118,7 @@ export abstract class BaseAgentNode implements AgentNode {
 
       // Update trace with result
       trace?.update({
-        output: { response: response.substring(0, 500) + '...' },
+        output: { response: response.substring(0, 500) + "..." },
         metadata: { duration },
       });
 
@@ -130,7 +141,10 @@ export abstract class BaseAgentNode implements AgentNode {
    * Parse JSON from LLM response
    * Handles various formats including markdown code blocks
    */
-  protected parseJsonResponse<T>(response: string, config: ParseConfig = {}): T {
+  protected parseJsonResponse<T>(
+    response: string,
+    config: ParseConfig = {},
+  ): T {
     const { extractJson = true, defaultValue, throwOnerror = true } = config;
 
     try {
@@ -192,12 +206,14 @@ export abstract class BaseAgentNode implements AgentNode {
   protected logStart(state: EstimationState): number {
     const startTime = Date.now();
     this.logger.log(`Starting ${this.name} node execution`);
-    this.logger.debug(`Current state: ${JSON.stringify({
-      inputFolder: state.inputFolder,
-      artifactsCount: state.artifacts.length,
-      requirementsCount: state.requirements.length,
-      estimatesCount: state.estimates.length,
-    })}`);
+    this.logger.debug(
+      `Current state: ${JSON.stringify({
+        inputFolder: state.inputFolder,
+        artifactsCount: state.artifacts.length,
+        requirementsCount: state.requirements.length,
+        estimatesCount: state.estimates.length,
+      })}`,
+    );
 
     // Create span for this node if tracing is enabled
     if (state.traceContext && this.tracingService) {
@@ -217,16 +233,22 @@ export abstract class BaseAgentNode implements AgentNode {
   /**
    * Log node execution completion and end span
    */
-  protected logComplete(startTime: number, update: StateUpdate, state?: EstimationState): void {
+  protected logComplete(
+    startTime: number,
+    update: StateUpdate,
+    state?: EstimationState,
+  ): void {
     const duration = Date.now() - startTime;
     this.logger.log(`Completed ${this.name} node in ${duration}ms`);
-    this.logger.debug(`State update: ${JSON.stringify({
-      validationStatus: update.validationStatus,
-      requirementsCount: update.requirements?.length,
-      atomicWorksCount: update.atomicWorks?.length,
-      estimatesCount: update.estimates?.length,
-      hasReport: !!update.report,
-    })}`);
+    this.logger.debug(
+      `State update: ${JSON.stringify({
+        validationStatus: update.validationStatus,
+        requirementsCount: update.requirements?.length,
+        atomicWorksCount: update.atomicWorks?.length,
+        estimatesCount: update.estimates?.length,
+        hasReport: !!update.report,
+      })}`,
+    );
 
     // End span for this node if tracing is enabled
     if (state?.traceContext && this.tracingService) {
@@ -253,14 +275,15 @@ export abstract class BaseAgentNode implements AgentNode {
 
     // Record error in span if tracing is enabled
     if (state.traceContext && this.tracingService) {
-      this.tracingService.recordSpanError(state.traceContext, this.name, errorObj);
+      this.tracingService.recordSpanError(
+        state.traceContext,
+        this.name,
+        errorObj,
+      );
     }
 
     return {
-      errors: [
-        ...state.errors,
-        this.createError(errorMessage, errorStack),
-      ],
+      errors: [...state.errors, this.createError(errorMessage, errorStack)],
       currentStep: this.name,
       shouldStop: true,
     };

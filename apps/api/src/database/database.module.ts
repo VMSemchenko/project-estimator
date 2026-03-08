@@ -10,8 +10,14 @@ export const MONGO_CLIENT = "MONGO_CLIENT";
   providers: [
     {
       provide: MONGO_CLIENT,
-      useFactory: async (configService: ConfigService<Config, true>) => {
-        const uri = configService.get("mongodb.uri", { infer: true });
+      useFactory: async (configService: ConfigService) => {
+        const config = configService.get<Config>("config");
+        const uri = config?.mongodb?.uri || process.env.MONGODB_URI || "";
+
+        if (!uri) {
+          throw new Error("MONGODB_URI is not configured");
+        }
+
         const client = new MongoClient(uri);
         await client.connect();
         return client;

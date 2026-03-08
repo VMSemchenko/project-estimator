@@ -8,7 +8,7 @@ import { LangfuseService } from "./ai/langfuse/langfuse.service";
 @Controller()
 export class AppController {
   constructor(
-    private configService: ConfigService<Config, true>,
+    private configService: ConfigService,
     @Inject(MONGO_CLIENT) private mongoClient: MongoClient,
     private langfuseService?: LangfuseService,
   ) {}
@@ -51,9 +51,10 @@ export class AppController {
 
   @Get("config")
   getConfig(): { nodeEnv: string; llmModel: string } {
+    const config = this.configService.get<Config>("config");
     return {
-      nodeEnv: this.configService.get("app.nodeEnv", { infer: true }),
-      llmModel: this.configService.get("zhipuai.llmModel", { infer: true }),
+      nodeEnv: config?.app?.nodeEnv || "development",
+      llmModel: config?.zhipuai?.llmModel || "glm-5",
     };
   }
 
@@ -67,23 +68,20 @@ export class AppController {
   }
 
   private checkZhipuAI(): string {
-    const apiKey = this.configService.get("zhipuai.apiKey", { infer: true });
+    const config = this.configService.get<Config>("config");
+    const apiKey = config?.zhipuai?.apiKey;
     return apiKey && apiKey.length > 0 ? "available" : "not_configured";
   }
 
   private checkLangfuse(): string {
-    const enabled = this.configService.get("langfuse.enabled", { infer: true });
+    const config = this.configService.get<Config>("config");
+    const enabled = config?.langfuse?.enabled;
     if (!enabled) {
       return "disabled";
     }
 
-    const publicKey = this.configService.get("langfuse.publicKey", {
-      infer: true,
-    });
-    const secretKey = this.configService.get("langfuse.secretKey", {
-      infer: true,
-    });
-
+    const publicKey = config?.langfuse?.publicKey;
+    const secretKey = config?.langfuse?.secretKey;
     return publicKey && secretKey ? "connected" : "not_configured";
   }
 }

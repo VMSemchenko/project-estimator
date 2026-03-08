@@ -2,23 +2,26 @@ import {
   Controller,
   Get,
   Post,
+  Delete,
   Body,
   Param,
   HttpCode,
   HttpStatus,
   Logger,
-} from '@nestjs/common';
-import { EstimationService } from './estimation.service';
-import { CreateEstimationDto } from './dto/create-estimation.dto';
+  NotFoundException,
+  PlainLiteralObject,
+} from "@nestjs/common";
+import { EstimationService } from "./estimation.service";
+import { CreateEstimationDto } from "./dto/create-estimation.dto";
 import {
   CreateEstimationResponseDto,
   GetEstimationResponseDto,
-} from './dto/estimation-response.dto';
+} from "./dto/estimation-response.dto";
 
 /**
  * Controller for estimation endpoints
  */
-@Controller('estimate')
+@Controller("estimate")
 export class EstimationController {
   private readonly logger = new Logger(EstimationController.name);
 
@@ -41,11 +44,37 @@ export class EstimationController {
    * GET /estimate/:id
    * Get estimation status and results
    */
-  @Get(':id')
+  @Get(":id")
   @HttpCode(HttpStatus.OK)
-  async getEstimation(@Param('id') id: string): Promise<GetEstimationResponseDto> {
+  async getEstimation(
+    @Param("id") id: string,
+  ): Promise<GetEstimationResponseDto> {
     this.logger.log(`Getting estimation: ${id}`);
     return this.estimationService.getEstimation(id);
+  }
+
+  /**
+   * GET /estimate/:id/report
+   * Get the markdown report for a completed estimation
+   */
+  @Get(":id/report")
+  @HttpCode(HttpStatus.OK)
+  async getEstimationReport(
+    @Param("id") id: string,
+  ): Promise<PlainLiteralObject> {
+    this.logger.log(`Getting estimation report: ${id}`);
+    const estimation = await this.estimationService.getEstimation(id);
+
+    if (!estimation.artifacts?.estimationReport) {
+      throw new NotFoundException(`Report not found for estimation ${id}`);
+    }
+
+    return {
+      id: estimation.id,
+      status: estimation.status,
+      report: estimation.artifacts.estimationReport,
+      csv: estimation.artifacts.detailedBreakdown,
+    };
   }
 
   /**
@@ -55,7 +84,7 @@ export class EstimationController {
   @Get()
   @HttpCode(HttpStatus.OK)
   async getAllEstimations(): Promise<GetEstimationResponseDto[]> {
-    this.logger.log('Getting all estimations');
+    this.logger.log("Getting all estimations");
     return this.estimationService.getAllEstimations();
   }
 
@@ -63,8 +92,9 @@ export class EstimationController {
    * DELETE /estimate/:id
    * Delete an estimation job
    */
+  @Delete(":id")
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteEstimation(@Param('id') id: string): Promise<void> {
+  async deleteEstimation(@Param("id") id: string): Promise<void> {
     this.logger.log(`Deleting estimation: ${id}`);
     return this.estimationService.deleteEstimation(id);
   }

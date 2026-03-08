@@ -1,9 +1,18 @@
 import { Injectable, Logger, OnModuleDestroy } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { Langfuse, LangfuseTraceClient, LangfuseSpanClient, LangfuseGenerationClient } from "langfuse";
+import {
+  Langfuse,
+  LangfuseTraceClient,
+  LangfuseSpanClient,
+  LangfuseGenerationClient,
+} from "langfuse";
 import { CallbackHandler } from "langfuse-langchain";
 import { Config } from "../../config/configuration";
-import { TokenUsage, LLMSpanData, ErrorData } from "../../observability/interfaces/trace-context.interface";
+import {
+  TokenUsage,
+  LLMSpanData,
+  ErrorData,
+} from "../../observability/interfaces/trace-context.interface";
 
 /**
  * Langfuse service for LLM observability and tracing
@@ -15,13 +24,17 @@ export class LangfuseService implements OnModuleDestroy {
   private readonly langfuseClient: Langfuse | null;
   private readonly enabled: boolean;
 
-  constructor(private readonly configService: ConfigService<Config, true>) {
-    this.enabled = configService.get("langfuse.enabled", { infer: true });
+  constructor(private readonly configService: ConfigService) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const config = (this.configService as any).get("config") as
+      | Config
+      | undefined;
+    this.enabled = config?.langfuse?.enabled ?? false;
 
     if (this.enabled) {
-      const publicKey = configService.get("langfuse.publicKey", { infer: true });
-      const secretKey = configService.get("langfuse.secretKey", { infer: true });
-      const host = configService.get("langfuse.host", { infer: true });
+      const publicKey = config?.langfuse?.publicKey || "";
+      const secretKey = config?.langfuse?.secretKey || "";
+      const host = config?.langfuse?.host || "https://cloud.langfuse.com";
 
       this.langfuseClient = new Langfuse({
         publicKey,
@@ -66,10 +79,14 @@ export class LangfuseService implements OnModuleDestroy {
       return null;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const config = (this.configService as any).get("config") as
+      | Config
+      | undefined;
     return new CallbackHandler({
-      publicKey: this.configService.get("langfuse.publicKey", { infer: true }),
-      secretKey: this.configService.get("langfuse.secretKey", { infer: true }),
-      baseUrl: this.configService.get("langfuse.host", { infer: true }),
+      publicKey: config?.langfuse?.publicKey || "",
+      secretKey: config?.langfuse?.secretKey || "",
+      baseUrl: config?.langfuse?.host || "https://cloud.langfuse.com",
       ...options,
     });
   }
@@ -207,10 +224,7 @@ export class LangfuseService implements OnModuleDestroy {
    * @param span - The span to track the error in
    * @param error - The error to track
    */
-  trackSpanError(
-    span: LangfuseSpanClient | null,
-    error: Error,
-  ): void {
+  trackSpanError(span: LangfuseSpanClient | null, error: Error): void {
     if (!this.enabled || !span) {
       return;
     }
@@ -257,10 +271,7 @@ export class LangfuseService implements OnModuleDestroy {
    * @param span - The span to end
    * @param output - Output data from the span
    */
-  endSpan(
-    span: LangfuseSpanClient | null,
-    output?: unknown,
-  ): void {
+  endSpan(span: LangfuseSpanClient | null, output?: unknown): void {
     if (!this.enabled || !span) {
       return;
     }
@@ -280,10 +291,7 @@ export class LangfuseService implements OnModuleDestroy {
    * @param trace - The trace to update
    * @param output - Final output data
    */
-  updateTraceOutput(
-    trace: LangfuseTraceClient | null,
-    output: unknown,
-  ): void {
+  updateTraceOutput(trace: LangfuseTraceClient | null, output: unknown): void {
     if (!this.enabled || !trace) {
       return;
     }

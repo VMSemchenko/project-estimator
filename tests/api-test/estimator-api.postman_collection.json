@@ -1,0 +1,376 @@
+{
+  "info": {
+    "name": "Estimator API",
+    "description": "Collection for testing the Estimator API endpoints. This API provides project estimation capabilities using AI agents.\n\n## Environment Variables\n- `API_BASE_URL`: Base URL for the API (default: http://localhost:3000)\n\n## Sample Projects\n- **sample-project**: E-Commerce Platform (React/NestJS)\n- **python-fastapi-project**: Task Management SaaS (Python/FastAPI)\n- **java-springboot-project**: Healthcare Patient Portal (Java/Spring Boot)\n- **go-microservices-project**: Real-time Analytics Platform (Go)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "API_BASE_URL",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "job_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "noauth"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Root Endpoint",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{API_BASE_URL}}/",
+              "host": ["{{API_BASE_URL}}"],
+              "path": [""]
+            },
+            "description": "Check if the API is running"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Create Estimation",
+      "item": [
+        {
+          "name": "E-Commerce Platform (React/NestJS)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 202', function () {",
+                  "    pm.response.to.have.status(202);",
+                  "});",
+                  "",
+                  "pm.test('Response has job ID', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set('job_id', jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputFolder\": \"apps/api/assets/samples/sample-project\",\n  \"outputFolder\": \"output/sample-project\",\n  \"verbose\": true\n}"
+            },
+            "url": {
+              "raw": "{{API_BASE_URL}}/estimate",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["estimate"]
+            },
+            "description": "Create estimation for E-Commerce Platform using React and NestJS"
+          },
+          "response": []
+        },
+        {
+          "name": "Task Management SaaS (Python/FastAPI)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 202', function () {",
+                  "    pm.response.to.have.status(202);",
+                  "});",
+                  "",
+                  "pm.test('Response has job ID', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set('job_id', jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputFolder\": \"apps/api/assets/samples/python-fastapi-project\",\n  \"outputFolder\": \"output/python-fastapi-project\",\n  \"verbose\": true\n}"
+            },
+            "url": {
+              "raw": "{{API_BASE_URL}}/estimate",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["estimate"]
+            },
+            "description": "Create estimation for Task Management SaaS using Python and FastAPI"
+          },
+          "response": []
+        },
+        {
+          "name": "Healthcare Portal (Java/Spring Boot)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 202', function () {",
+                  "    pm.response.to.have.status(202);",
+                  "});",
+                  "",
+                  "pm.test('Response has job ID', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set('job_id', jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputFolder\": \"apps/api/assets/samples/java-springboot-project\",\n  \"outputFolder\": \"output/java-springboot-project\",\n  \"verbose\": true\n}"
+            },
+            "url": {
+              "raw": "{{API_BASE_URL}}/estimate",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["estimate"]
+            },
+            "description": "Create estimation for Healthcare Patient Portal using Java and Spring Boot"
+          },
+          "response": []
+        },
+        {
+          "name": "Real-time Analytics (Go Microservices)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 202', function () {",
+                  "    pm.response.to.have.status(202);",
+                  "});",
+                  "",
+                  "pm.test('Response has job ID', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set('job_id', jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputFolder\": \"apps/api/assets/samples/go-microservices-project\",\n  \"outputFolder\": \"output/go-microservices-project\",\n  \"verbose\": true\n}"
+            },
+            "url": {
+              "raw": "{{API_BASE_URL}}/estimate",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["estimate"]
+            },
+            "description": "Create estimation for Real-time Analytics Platform using Go Microservices"
+          },
+          "response": []
+        },
+        {
+          "name": "Custom Project (Test Mode)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 202', function () {",
+                  "    pm.response.to.have.status(202);",
+                  "});",
+                  "",
+                  "pm.test('Response has job ID', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set('job_id', jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputFolder\": \"apps/api/assets/samples/sample-project\",\n  \"outputFolder\": \"output/test-run\",\n  \"verbose\": true,\n  \"testMode\": true\n}"
+            },
+            "url": {
+              "raw": "{{API_BASE_URL}}/estimate",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["estimate"]
+            },
+            "description": "Create estimation in test mode for faster processing"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Get Estimation",
+      "item": [
+        {
+          "name": "Get Estimation by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has required fields', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{API_BASE_URL}}/estimate/{{job_id}}",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["estimate", "{{job_id}}"]
+            },
+            "description": "Get estimation status and results by ID. Use the job_id variable set from Create Estimation requests."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Estimations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is an array', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{API_BASE_URL}}/estimate",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["estimate"]
+            },
+            "description": "Get all estimation jobs (admin/debug endpoint)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Delete Estimation",
+      "item": [
+        {
+          "name": "Delete Estimation by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 204', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{API_BASE_URL}}/estimate/{{job_id}}",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["estimate", "{{job_id}}"]
+            },
+            "description": "Delete an estimation job by ID"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

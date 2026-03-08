@@ -1,7 +1,10 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { ChatOpenAI } from "@langchain/openai";
-import { LLMProvider, LLMProviderConfig } from "../interfaces/llm-provider.interface";
+import {
+  LLMProvider,
+  LLMProviderConfig,
+} from "../interfaces/llm-provider.interface";
 import { Config } from "../../config/configuration";
 
 /**
@@ -13,16 +16,28 @@ export class LangchainLLMProvider implements LLMProvider {
   private readonly chatModel: ChatOpenAI;
   private readonly modelName: string;
 
-  constructor(private readonly configService: ConfigService<Config, true>) {
+  constructor(private readonly configService: ConfigService) {
+    const fullConfig = configService.get<Config>("config");
+
     const config: LLMProviderConfig = {
-      apiKey: configService.get("zhipuai.apiKey", { infer: true }),
-      baseUrl: configService.get("zhipuai.baseUrl", { infer: true }),
-      modelName: configService.get("zhipuai.llmModel", { infer: true }),
+      apiKey: fullConfig?.zhipuai?.apiKey || process.env.ZHIPUAI_API_KEY || "",
+      baseUrl:
+        fullConfig?.zhipuai?.baseUrl ||
+        process.env.ZHIPUAI_BASE_URL ||
+        "https://open.bigmodel.cn/api/paas/v4",
+      modelName:
+        fullConfig?.zhipuai?.llmModel || process.env.LLM_MODEL || "glm-5",
       temperature: 0.1,
     };
 
     this.modelName = config.modelName;
-    this.logger.log(`Initializing LLM provider with model: ${config.modelName}`);
+    this.logger.log(
+      `Initializing LLM provider with model: ${config.modelName}`,
+    );
+
+    if (!config.apiKey) {
+      throw new Error("ZHIPUAI_API_KEY is not configured");
+    }
 
     this.chatModel = new ChatOpenAI({
       modelName: config.modelName,

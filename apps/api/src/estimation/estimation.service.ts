@@ -1,6 +1,6 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { v4 as uuidv4 } from 'uuid';
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { v4 as uuidv4 } from "uuid";
 import {
   EstimationJob,
   EstimationStatus,
@@ -9,11 +9,11 @@ import {
   CreateEstimationResponse,
   GetEstimationResponse,
   EstimationLinks,
-} from './interfaces/estimation-job.interface';
-import { CreateEstimationDto } from './dto/create-estimation.dto';
-import { AgentsService } from '../agents';
-import { TracingService, MetricsService } from '../observability';
-import { TraceContext } from '../observability/interfaces/trace-context.interface';
+} from "./interfaces/estimation-job.interface";
+import { CreateEstimationDto } from "./dto/create-estimation.dto";
+import { AgentsService } from "../agents";
+import { TracingService, MetricsService } from "../observability";
+import { TraceContext } from "../observability/interfaces/trace-context.interface";
 
 /**
  * Service for managing estimation jobs
@@ -35,8 +35,8 @@ export class EstimationService {
    */
   private generateId(): string {
     const date = new Date();
-    const dateStr = date.toISOString().split('T')[0].replace(/-/g, '');
-    const shortId = uuidv4().split('-')[0];
+    const dateStr = date.toISOString().split("T")[0].replace(/-/g, "");
+    const shortId = uuidv4().split("-")[0];
     return `est-${dateStr}-${shortId}`;
   }
 
@@ -53,7 +53,9 @@ export class EstimationService {
   /**
    * Create a new estimation job
    */
-  async createEstimation(dto: CreateEstimationDto): Promise<CreateEstimationResponse> {
+  async createEstimation(
+    dto: CreateEstimationDto,
+  ): Promise<CreateEstimationResponse> {
     const id = this.generateId();
     const now = new Date();
 
@@ -61,7 +63,7 @@ export class EstimationService {
       id,
       status: EstimationStatus.PENDING,
       inputFolder: dto.inputFolder,
-      outputFolder: dto.outputFolder || './reports',
+      outputFolder: dto.outputFolder || "./reports",
       verbose: dto.verbose ?? false,
       testMode: dto.testMode ?? false,
       createdAt: now,
@@ -164,10 +166,14 @@ export class EstimationService {
         };
       }
 
-      if (result.summary?.reportGenerated) {
+      // Include the actual report content in artifacts
+      if (result.summary?.reportGenerated && result.finalState?.report) {
+        const report = result.finalState.report;
         job.artifacts = {
           report: `${job.outputFolder}/estimation-report.md`,
           csv: `${job.outputFolder}/estimation-breakdown.csv`,
+          estimationReport: report.markdownContent,
+          detailedBreakdown: report.csvContent,
         };
       }
 
@@ -185,9 +191,9 @@ export class EstimationService {
         .withDuration(Date.now() - traceContext.startTime.getTime());
 
       this.metricsService.recordEstimationMetrics(metricsBuilder.build());
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       const errorObj = error instanceof Error ? error : new Error(errorMessage);
       this.logger.error(`Estimation ${id} failed:`, errorMessage);
 
@@ -198,7 +204,7 @@ export class EstimationService {
 
       // Record error in trace and metrics
       this.tracingService.recordTraceError(traceContext, errorObj, {
-        stage: 'estimation',
+        stage: "estimation",
       });
       this.tracingService.endEstimationTrace(traceContext, {
         success: false,
@@ -219,7 +225,11 @@ export class EstimationService {
   /**
    * Determine confidence level based on pipeline summary
    */
-  private determineConfidenceLevel(summary: { artifactsProcessed: number; requirementsExtracted: number; validationPassed: boolean }): ConfidenceLevel {
+  private determineConfidenceLevel(summary: {
+    artifactsProcessed: number;
+    requirementsExtracted: number;
+    validationPassed: boolean;
+  }): ConfidenceLevel {
     if (summary.validationPassed && summary.requirementsExtracted >= 5) {
       return ConfidenceLevel.HIGH;
     } else if (summary.requirementsExtracted >= 2) {
@@ -233,9 +243,9 @@ export class EstimationService {
    */
   private mapConfidenceLevel(level: string): ConfidenceLevel {
     switch (level?.toLowerCase()) {
-      case 'high':
+      case "high":
         return ConfidenceLevel.HIGH;
-      case 'low':
+      case "low":
         return ConfidenceLevel.LOW;
       default:
         return ConfidenceLevel.MEDIUM;
@@ -260,7 +270,8 @@ export class EstimationService {
     }
 
     return estimations.sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
   }
 

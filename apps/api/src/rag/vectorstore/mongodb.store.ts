@@ -19,12 +19,13 @@ export class MongodbStore implements OnModuleDestroy {
   private readonly indexName: string;
 
   constructor(
-    private readonly configService: ConfigService<Config, true>,
+    private readonly configService: ConfigService,
     private readonly embeddingProvider: LangchainEmbeddingProvider,
     @Inject(MONGO_CLIENT) private readonly mongoClient: MongoClient,
   ) {
-    const dbName = configService.get("mongodb.dbName", { infer: true });
-    this.indexName = configService.get("mongodb.vectorSearchIndex", { infer: true });
+    const config = configService.get<Config>("config");
+    const dbName = config?.mongodb?.dbName || "estimator";
+    this.indexName = config?.mongodb?.vectorSearchIndex || "vector_index";
 
     const db = mongoClient.db(dbName);
     this.collection = db.collection("catalogs");
@@ -88,10 +89,18 @@ export class MongodbStore implements OnModuleDestroy {
     query: string,
     k: number = 4,
     filter?: Record<string, unknown>,
-  ): Promise<{ content: string; score: number; metadata: Record<string, unknown> }[]> {
-    this.logger.debug(`Performing similarity search for: ${query.substring(0, 50)}...`);
+  ): Promise<
+    { content: string; score: number; metadata: Record<string, unknown> }[]
+  > {
+    this.logger.debug(
+      `Performing similarity search for: ${query.substring(0, 50)}...`,
+    );
 
-    const results = await this.vectorStore.similaritySearchWithScore(query, k, filter);
+    const results = await this.vectorStore.similaritySearchWithScore(
+      query,
+      k,
+      filter,
+    );
 
     return results.map(([document, score]) => ({
       content: document.pageContent,
@@ -107,7 +116,9 @@ export class MongodbStore implements OnModuleDestroy {
     embedding: number[],
     k: number = 4,
     filter?: Record<string, unknown>,
-  ): Promise<{ content: string; score: number; metadata: Record<string, unknown> }[]> {
+  ): Promise<
+    { content: string; score: number; metadata: Record<string, unknown> }[]
+  > {
     this.logger.debug(`Performing vector similarity search with ${k} results`);
 
     const results = await this.vectorStore.similaritySearchVectorWithScore(

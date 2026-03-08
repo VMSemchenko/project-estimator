@@ -2,19 +2,19 @@
  * Estimation job status enum
  */
 export enum EstimationStatus {
-  PENDING = 'pending',
-  PROCESSING = 'processing',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
+  PENDING = "pending",
+  PROCESSING = "processing",
+  COMPLETED = "completed",
+  FAILED = "failed",
 }
 
 /**
  * Confidence level for estimation results
  */
 export enum ConfidenceLevel {
-  HIGH = 'high',
-  MEDIUM = 'medium',
-  LOW = 'low',
+  HIGH = "high",
+  MEDIUM = "medium",
+  LOW = "low",
 }
 
 /**
@@ -32,6 +32,9 @@ export interface EstimationSummary {
 export interface EstimationArtifacts {
   report: string;
   csv: string;
+  estimationReport?: string; // Full markdown report content
+  detailedBreakdown?: string; // JSON breakdown content
+  riskAssessment?: string; // Risk assessment content
 }
 
 /**

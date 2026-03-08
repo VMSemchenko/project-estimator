@@ -17,16 +17,30 @@ export class LangchainEmbeddingProvider implements EmbeddingProvider {
   private readonly embeddings: OpenAIEmbeddings;
   private readonly modelName: string;
 
-  constructor(private readonly configService: ConfigService<Config, true>) {
+  constructor(private readonly configService: ConfigService) {
+    const fullConfig = configService.get<Config>("config");
+
     const config: EmbeddingProviderConfig = {
-      apiKey: configService.get("zhipuai.apiKey", { infer: true }),
-      baseUrl: configService.get("zhipuai.baseUrl", { infer: true }),
-      modelName: configService.get("zhipuai.embeddingModel", { infer: true }),
+      apiKey: fullConfig?.zhipuai?.apiKey || process.env.ZHIPUAI_API_KEY || "",
+      baseUrl:
+        fullConfig?.zhipuai?.baseUrl ||
+        process.env.ZHIPUAI_BASE_URL ||
+        "https://open.bigmodel.cn/api/paas/v4",
+      modelName:
+        fullConfig?.zhipuai?.embeddingModel ||
+        process.env.EMBEDDING_MODEL ||
+        "embedding-3",
       batchSize: 100,
     };
 
     this.modelName = config.modelName;
-    this.logger.log(`Initializing embedding provider with model: ${config.modelName}`);
+    this.logger.log(
+      `Initializing embedding provider with model: ${config.modelName}`,
+    );
+
+    if (!config.apiKey) {
+      throw new Error("ZHIPUAI_API_KEY is not configured");
+    }
 
     this.embeddings = new OpenAIEmbeddings({
       modelName: config.modelName,
