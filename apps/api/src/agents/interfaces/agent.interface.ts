@@ -1,5 +1,9 @@
-import { AgentType } from '../../prompts/interfaces/prompt-context.interface';
-import { EstimationState, NodeConfig, StateUpdate } from './agent-state.interface';
+import { AgentType } from "../../prompts/interfaces/prompt-context.interface";
+import {
+  EstimationState,
+  NodeConfig,
+  StateUpdate,
+} from "./agent-state.interface";
 
 /**
  * Interface for a LangGraph agent node
@@ -22,16 +26,19 @@ export interface AgentNode {
  */
 export interface AgentDependencies {
   /** Prompts service for template management */
-  promptsService: import('../../prompts/prompts.service').PromptsService;
+  promptsService: import("../../prompts/prompts.service").PromptsService;
 
   /** LLM provider for AI operations */
-  llmProvider: import('../../ai/interfaces/llm-provider.interface').LLMProvider;
+  llmProvider: import("../../ai/interfaces/llm-provider.interface").LLMProvider;
 
   /** RAG service for similarity search */
-  ragService?: import('../../rag/rag.service').RagService;
+  ragService?: import("../../rag/rag.service").RagService;
 
   /** Langfuse service for tracing */
-  langfuseService?: import('../../ai/langfuse/langfuse.service').LangfuseService;
+  langfuseService?: import("../../ai/langfuse/langfuse.service").LangfuseService;
+
+  /** Catalogs service for accessing BA processes and atomic works */
+  catalogsService?: import("../../catalogs/catalogs.service").CatalogsService;
 }
 
 /**

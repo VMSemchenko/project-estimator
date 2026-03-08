@@ -14,6 +14,8 @@ import { LangchainLLMProvider } from "../ai/providers/langchain-llm.provider";
 import { LangfuseService } from "../ai/langfuse/langfuse.service";
 import { RagService } from "../rag/rag.service";
 import { Config } from "../config/configuration";
+import { CatalogsModule } from "../catalogs/catalogs.module";
+import { CatalogsService } from "../catalogs/catalogs.service";
 
 import {
   ValidationNode,
@@ -375,7 +377,7 @@ export class GraphService {
  * Module for managing and executing LangGraph agent nodes
  */
 @Module({
-  imports: [AiModule, PromptsModule, RagModule],
+  imports: [AiModule, PromptsModule, RagModule, CatalogsModule],
   providers: [
     // Node providers
     {
@@ -411,17 +413,20 @@ export class GraphService {
         llmProvider: LangchainLLMProvider,
         ragService: RagService,
         langfuseService: LangfuseService,
+        catalogsService: CatalogsService,
       ): AgentDependencies => ({
         promptsService,
         llmProvider,
         ragService,
         langfuseService,
+        catalogsService,
       }),
       inject: [
         PromptsService,
         LangchainLLMProvider,
         RagService,
         LangfuseService,
+        CatalogsService,
       ],
     },
     // Graph service provider
