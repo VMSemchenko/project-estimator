@@ -1,0 +1,9 @@
+# Demo BA Processes Catalog - Minimal set for testing and learning
+# Contains only 2 items for quick experimentation
+
+ba_processes:
+  - id: requirements_documentation
+    name: Requirements Documentation
+    description: Documenting requirements in structured format
+    category: documentation
+    typical_hours: 4

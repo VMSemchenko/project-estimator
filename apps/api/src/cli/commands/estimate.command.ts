@@ -3,26 +3,27 @@
  * Runs the full estimation pipeline on a folder of discovery artifacts
  */
 
-import { Command } from 'commander';
-import * as path from 'path';
-import * as fs from 'fs';
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from '../../app.module';
-import { PromptsService } from '../../prompts/prompts.service';
-import { LangchainLLMProvider } from '../../ai/providers/langchain-llm.provider';
-import { LangchainEmbeddingProvider } from '../../ai/providers/langchain-embedding.provider';
-import { RagService } from '../../rag/rag.service';
-import { LangfuseService } from '../../ai/langfuse/langfuse.service';
-import { CatalogsService } from '../../catalogs/catalogs.service';
+import { Command } from "commander";
+import * as path from "path";
+import * as fs from "fs";
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "../../app.module";
+import { PromptsService } from "../../prompts/prompts.service";
+import { LangchainLLMProvider } from "../../ai/providers/langchain-llm.provider";
+import { LangchainEmbeddingProvider } from "../../ai/providers/langchain-embedding.provider";
+import { RagService } from "../../rag/rag.service";
+import { LangfuseService } from "../../ai/langfuse/langfuse.service";
+import { CatalogsService } from "../../catalogs/catalogs.service";
 import {
   createEstimationGraph,
   executeEstimationGraph,
   GraphExecutionOptions,
-} from '../../agents/graph/estimation.graph';
-import { AgentDependencies } from '../../agents/interfaces/agent.interface';
-import { GraphState } from '../../agents/graph/state';
-import { createProgress, Progress } from '../utils/progress';
-import { createOutputWriter, OutputWriter } from '../utils/output-writer';
+} from "../../agents/graph/estimation.graph";
+import { AgentDependencies } from "../../agents/interfaces/agent.interface";
+import { GraphState } from "../../agents/graph/state";
+import { createProgress, Progress } from "../utils/progress";
+import { createOutputWriter, OutputWriter } from "../utils/output-writer";
+import { generateLogFileName } from "../utils/logger";
 
 /**
  * Estimate command options
@@ -36,6 +37,10 @@ export interface EstimateCommandOptions {
   testMode?: boolean;
   /** Force catalog re-indexing */
   reindex?: boolean;
+  /** Catalog set to use (demo or real-world) */
+  catalog?: string;
+  /** Log file path */
+  logFile?: string;
 }
 
 /**
@@ -43,7 +48,7 @@ export interface EstimateCommandOptions {
  */
 async function runEstimate(
   inputFolder: string,
-  options: EstimateCommandOptions
+  options: EstimateCommandOptions,
 ): Promise<void> {
   const progress = createProgress({ verbose: options.verbose });
 
@@ -66,10 +71,10 @@ async function runEstimate(
 
   try {
     // Initialize NestJS application context
-    progress.header('search', 'Initializing estimation system');
+    progress.header("search", "Initializing estimation system");
 
     const app = await NestFactory.createApplicationContext(AppModule, {
-      logger: options.verbose ? ['error', 'warn', 'log'] : ['error'],
+      logger: options.verbose ? ["error", "warn", "log"] : ["error"],
     });
 
     // Get services
@@ -82,16 +87,25 @@ async function runEstimate(
 
     // Configure model based on test mode
     if (options.testMode) {
-      progress.verbose('Using test mode with cheaper model');
+      progress.verbose("Using test mode with cheaper model");
       // Could configure different model here
+    }
+
+    // Switch catalog set if specified (instant - no re-indexing needed)
+    const catalogSet = options.catalog || "real-world";
+    if (catalogSet !== catalogsService.getCurrentCatalogSet()) {
+      progress.start(`Switching to catalog set: ${catalogSet}...`);
+      await catalogsService.switchCatalogSet(catalogSet);
+      progress.succeed(`Using catalog set: ${catalogSet}`);
+    } else {
+      progress.verbose(`Using catalog set: ${catalogSet}`);
     }
 
     // Force re-index if requested
     if (options.reindex) {
-      progress.start('Re-indexing catalogs...');
-      await catalogsService.loadAllCatalogs();
-      await catalogsService.indexCatalogs();
-      progress.succeed('Catalogs re-indexed');
+      progress.start("Re-indexing all catalogs...");
+      await catalogsService.reindexCatalogs();
+      progress.succeed("Catalogs re-indexed");
     }
 
     // Create agent dependencies
@@ -103,11 +117,11 @@ async function runEstimate(
     };
 
     // Create estimation graph
-    progress.verbose('Creating estimation graph');
+    progress.verbose("Creating estimation graph");
     const graph = createEstimationGraph(dependencies);
 
     // Execute estimation with progress tracking
-    progress.header('search', 'Validating input artifacts');
+    progress.header("search", "Validating input artifacts");
 
     const graphOptions: GraphExecutionOptions = {
       maxSteps: 10,
@@ -129,7 +143,7 @@ async function runEstimate(
 
     // Generate output files
     if (result.report) {
-      progress.header('document', 'Generating report');
+      progress.header("document", "Generating report");
 
       const outputWriter = createOutputWriter({
         outputDir: outputPath,
@@ -145,22 +159,21 @@ async function runEstimate(
       const duration = Date.now() - startTime;
       printSummary(progress, result, duration);
     } else {
-      progress.error('No report generated');
+      progress.error("No report generated");
       process.exit(1);
     }
 
     // Clean up
     await app.close();
     progress.stop();
-
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    progress.error('Estimation failed', errorMessage);
-    
+    progress.error("Estimation failed", errorMessage);
+
     if (options.verbose && error instanceof Error && error.stack) {
       console.error(error.stack);
     }
-    
+
     process.exit(1);
   }
 }
@@ -171,17 +184,17 @@ async function runEstimate(
 function updateProgressForStep(
   progress: Progress,
   step: string,
-  state: GraphState
+  state: GraphState,
 ): void {
   switch (step) {
-    case 'validation':
-      if (state.validationStatus === 'valid') {
+    case "validation":
+      if (state.validationStatus === "valid") {
         const artifactCount = state.artifacts.length;
-        const artifactNames = state.artifacts.map((a) => a.name).join(', ');
+        const artifactNames = state.artifacts.map((a) => a.name).join(", ");
         progress.succeed(`Found ${artifactCount} artifacts`);
         progress.logItem(artifactNames);
-      } else if (state.validationStatus === 'invalid') {
-        progress.fail('Validation failed');
+      } else if (state.validationStatus === "invalid") {
+        progress.fail("Validation failed");
         if (state.validationReport) {
           for (const missing of state.validationReport.missingArtifacts) {
             progress.logItem(`Missing: ${missing}`, false);
@@ -190,27 +203,27 @@ function updateProgressForStep(
       }
       break;
 
-    case 'extraction':
+    case "extraction":
       if (state.requirements.length > 0) {
         progress.succeed(`Extracted ${state.requirements.length} requirements`);
       }
       break;
 
-    case 'decomposition':
+    case "decomposition":
       if (state.atomicWorks.length > 0) {
         progress.succeed(`Mapped ${state.atomicWorks.length} atomic works`);
       }
       break;
 
-    case 'estimation':
+    case "estimation":
       if (state.estimates.length > 0) {
         progress.succeed(`Calculated ${state.estimates.length} estimates`);
       }
       break;
 
-    case 'reporting':
+    case "reporting":
       if (state.report) {
-        progress.succeed('Report generated');
+        progress.succeed("Report generated");
       }
       break;
   }
@@ -222,7 +235,7 @@ function updateProgressForStep(
 function printSummary(
   progress: Progress,
   result: GraphState,
-  duration: number
+  duration: number,
 ): void {
   const report = result.report;
 
@@ -241,18 +254,18 @@ function printSummary(
     confidenceLevels[estimate.confidence]++;
   }
 
-  let overallConfidence = 'Medium';
+  let overallConfidence = "Medium";
   if (confidenceLevels.high > confidenceLevels.low) {
-    overallConfidence = 'High';
+    overallConfidence = "High";
   } else if (confidenceLevels.low > confidenceLevels.high) {
-    overallConfidence = 'Low';
+    overallConfidence = "Low";
   }
 
-  progress.summary('Summary', {
-    'Total BA Hours': report.totalHours.toFixed(1),
-    'Requirements': report.summaryByRequirement.length.toString(),
-    'Confidence': overallConfidence,
-    'Duration': `${Math.round(duration / 1000)}s`,
+  progress.summary("Summary", {
+    "Total BA Hours": report.totalHours.toFixed(1),
+    Requirements: report.summaryByRequirement.length.toString(),
+    Confidence: overallConfidence,
+    Duration: `${Math.round(duration / 1000)}s`,
   });
 }
 
@@ -261,12 +274,21 @@ function printSummary(
  */
 export function configureEstimateCommand(program: Command): void {
   program
-    .command('estimate <input_folder>')
-    .description('Generate BA work estimation for a project')
-    .option('-o, --output <path>', 'Output directory (default: input_folder)')
-    .option('-v, --verbose', 'Show detailed progress', false)
-    .option('-t, --test-mode', 'Use cheaper/faster model', false)
-    .option('-r, --reindex', 'Force catalog re-indexing', false)
+    .command("estimate <input_folder>")
+    .description("Generate BA work estimation for a project")
+    .option("-o, --output <path>", "Output directory (default: input_folder)")
+    .option("-v, --verbose", "Show detailed progress", false)
+    .option("-t, --test-mode", "Use cheaper/faster model", false)
+    .option("-r, --reindex", "Force catalog re-indexing", false)
+    .option(
+      "-c, --catalog <name>",
+      "Catalog set to use (demo or real-world)",
+      "real-world",
+    )
+    .option(
+      "-l, --log-file <path>",
+      "Log file path (default: logs/estimation-<timestamp>.log)",
+    )
     .action(async (inputFolder: string, options: EstimateCommandOptions) => {
       await runEstimate(inputFolder, options);
     });

@@ -228,7 +228,7 @@ const https = require('https');
 require('dotenv').config({ path: process.argv[2] });
 
 const apiKey = process.env.ZHIPUAI_API_KEY;
-const baseUrl = process.env.ZHIPUAI_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4';
+const baseUrl = process.env.ZHIPUAI_BASE_URL || 'https://api.z.ai/api/paas/v4';
 
 if (!apiKey || apiKey === 'your_zhipuai_api_key') {
   console.error('ZHIPUAI_API_KEY not set or using placeholder');
@@ -308,7 +308,7 @@ async function testEmbedding() {
     modelName: process.env.EMBEDDING_MODEL || 'embedding-3',
     openAIApiKey: process.env.ZHIPUAI_API_KEY,
     configuration: {
-      baseURL: process.env.ZHIPUAI_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4',
+      baseURL: process.env.ZHIPUAI_BASE_URL || 'https://api.z.ai/api/paas/v4',
     },
   });
   

@@ -5,7 +5,7 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "tsConfigPath": "tsconfig.json",
-    "assets": ["**/*.md"],
+    "assets": ["**/*.md", "**/*.yaml", "**/*.yml"],
     "watchAssets": true
   },
   "projects": {
@@ -16,7 +16,7 @@
       "sourceRoot": "apps/api/src",
       "compilerOptions": {
         "tsConfigPath": "tsconfig.json",
-        "assets": ["**/*.md"],
+        "assets": ["**/*.md", "**/*.yaml", "**/*.yml"],
         "watchAssets": true
       }
     }

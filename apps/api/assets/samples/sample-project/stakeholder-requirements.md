@@ -12,7 +12,6 @@ Users must be able to register, login, and manage their accounts.
 - AC-001.6: Two-factor authentication is available as optional feature
 
 ### Priority: High
-### Effort Estimate: 40 hours
 
 ---
 
@@ -28,7 +27,6 @@ The system must display products with categories, search, and filtering.
 - AC-002.6: Catalog supports pagination with 20 items per page
 
 ### Priority: High
-### Effort Estimate: 60 hours
 
 ---
 
@@ -44,7 +42,6 @@ Users must be able to add products to cart and modify quantities.
 - AC-003.6: Guest users can use cart (stored in session/localStorage)
 
 ### Priority: High
-### Effort Estimate: 30 hours
 
 ---
 
@@ -61,7 +58,6 @@ Support credit card, PayPal, and Apple Pay payments.
 - AC-004.7: Support for refunds within 30 days
 
 ### Priority: High
-### Effort Estimate: 80 hours
 
 ---
 
@@ -76,7 +72,6 @@ System must deliver purchased digital products securely.
 - AC-005.5: Products available in customer dashboard
 
 ### Priority: High
-### Effort Estimate: 35 hours
 
 ---
 
@@ -92,7 +87,6 @@ Content creators can manage their products and view sales.
 - AC-006.6: Sellers can set promotional pricing
 
 ### Priority: Medium
-### Effort Estimate: 70 hours
 
 ---
 
@@ -108,7 +102,6 @@ Administrators can manage the platform.
 - AC-007.6: Admin actions are logged for audit
 
 ### Priority: Medium
-### Effort Estimate: 50 hours
 
 ---
 
@@ -124,7 +117,6 @@ Customers can review and rate purchased products.
 - AC-008.6: Average rating displayed on product page
 
 ### Priority: Low
-### Effort Estimate: 25 hours
 
 ---
 
@@ -139,7 +131,6 @@ Platform provides business analytics for admins and sellers.
 - AC-009.5: Real-time sales notifications for sellers
 
 ### Priority: Medium
-### Effort Estimate: 45 hours
 
 ---
 
@@ -154,4 +145,3 @@ Users receive notifications for important events.
 - AC-010.5: Notification preferences configurable by user
 
 ### Priority: Low
-### Effort Estimate: 30 hours

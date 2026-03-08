@@ -92,6 +92,14 @@ export class MongodbStore implements OnModuleDestroy {
   ): Promise<
     { content: string; score: number; metadata: Record<string, unknown> }[]
   > {
+    // Validate query parameter
+    if (!query || typeof query !== "string") {
+      this.logger.warn(
+        "Invalid query provided for similarity search, returning empty results",
+      );
+      return [];
+    }
+
     this.logger.debug(
       `Performing similarity search for: ${query.substring(0, 50)}...`,
     );
@@ -163,6 +171,14 @@ export class MongodbStore implements OnModuleDestroy {
    */
   async getDocumentCount(): Promise<number> {
     return this.collection.countDocuments();
+  }
+
+  /**
+   * Clear all documents from the collection
+   */
+  async clearCollection(): Promise<void> {
+    this.logger.log("Clearing all documents from collection");
+    await this.collection.deleteMany({});
   }
 
   /**

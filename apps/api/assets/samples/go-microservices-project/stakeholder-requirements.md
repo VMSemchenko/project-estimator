@@ -15,7 +15,6 @@ Users must be able to register and manage IoT devices.
 
 ### Priority: High
 
-### Effort Estimate: 60 hours
 
 ---
 
@@ -34,7 +33,6 @@ Devices must be able to send telemetry data to the platform.
 
 ### Priority: Critical
 
-### Effort Estimate: 80 hours
 
 ---
 
@@ -53,7 +51,6 @@ Users must be able to create and view real-time dashboards.
 
 ### Priority: High
 
-### Effort Estimate: 100 hours
 
 ---
 
@@ -72,7 +69,6 @@ Users must be able to configure and receive alerts.
 
 ### Priority: High
 
-### Effort Estimate: 90 hours
 
 ---
 
@@ -91,7 +87,6 @@ Users must be able to query historical telemetry data.
 
 ### Priority: High
 
-### Effort Estimate: 70 hours
 
 ---
 
@@ -110,7 +105,6 @@ The system must detect anomalies in telemetry data.
 
 ### Priority: Medium
 
-### Effort Estimate: 80 hours
 
 ---
 
@@ -129,7 +123,6 @@ The system must predict equipment failures.
 
 ### Priority: Medium
 
-### Effort Estimate: 100 hours
 
 ---
 
@@ -148,7 +141,6 @@ Users must be able to generate reports.
 
 ### Priority: Medium
 
-### Effort Estimate: 60 hours
 
 ---
 
@@ -167,7 +159,6 @@ Users must be able to access data via API.
 
 ### Priority: High
 
-### Effort Estimate: 70 hours
 
 ---
 
@@ -186,7 +177,6 @@ Administrators must be able to manage users and permissions.
 
 ### Priority: Medium
 
-### Effort Estimate: 50 hours
 
 ---
 
@@ -205,7 +195,6 @@ The system must integrate with existing SCADA systems.
 
 ### Priority: Medium
 
-### Effort Estimate: 90 hours
 
 ---
 
@@ -224,7 +213,6 @@ Field technicians must have mobile access.
 
 ### Priority: Medium
 
-### Effort Estimate: 80 hours
 
 ---
 
@@ -243,7 +231,6 @@ Users must be able to export data for external analysis.
 
 ### Priority: Low
 
-### Effort Estimate: 40 hours
 
 ---
 
@@ -262,4 +249,3 @@ Support for edge deployment for low-latency processing.
 
 ### Priority: Low
 
-### Effort Estimate: 100 hours

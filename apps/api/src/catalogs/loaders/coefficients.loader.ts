@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as yaml from 'yaml';
+import { Injectable, Logger } from "@nestjs/common";
+import * as fs from "fs";
+import * as path from "path";
+import * as yaml from "yaml";
 import {
   Coefficient,
   CoefficientYaml,
@@ -9,7 +9,7 @@ import {
   CoefficientDocument,
   CoefficientMatch,
   AppliedCoefficients,
-} from '../interfaces/coefficient.interface';
+} from "../interfaces/coefficient.interface";
 
 /**
  * Loader for Coefficients catalog from YAML file.
@@ -23,21 +23,28 @@ export class CoefficientsLoader {
 
   /**
    * Load coefficients from the YAML catalog file
-   * @param catalogPath - Path to the coefficients.yaml file
+   * @param catalogSet - The catalog set to load ('demo' or 'real-world')
+   * @param catalogPath - Optional explicit path to the coefficients.yaml file
    */
-  async load(catalogPath?: string): Promise<Coefficient[]> {
+  async load(
+    catalogSet: string = "real-world",
+    catalogPath?: string,
+  ): Promise<Coefficient[]> {
     const filePath =
       catalogPath ||
-      path.join(__dirname, '../../../assets/catalogs/coefficients.yaml');
+      path.join(
+        process.cwd(),
+        `apps/api/assets/catalogs/${catalogSet}/coefficients.yaml`,
+      );
 
     this.logger.log(`Loading coefficients from: ${filePath}`);
 
     try {
-      const fileContent = await fs.promises.readFile(filePath, 'utf-8');
+      const fileContent = await fs.promises.readFile(filePath, "utf-8");
       const catalog: CoefficientsCatalog = yaml.parse(fileContent);
 
       if (!catalog || !catalog.coefficients) {
-        throw new Error('Invalid coefficients catalog structure');
+        throw new Error("Invalid coefficients catalog structure");
       }
 
       this.coefficients = catalog.coefficients.map((item: CoefficientYaml) =>
@@ -127,7 +134,7 @@ export class CoefficientsLoader {
     return {
       ...coefficient,
       searchableText: this.createSearchableText(coefficient),
-      docType: 'coefficient',
+      docType: "coefficient",
     };
   }
 
@@ -155,6 +162,6 @@ export class CoefficientsLoader {
       coefficient.description,
       ...coefficient.triggers,
     ];
-    return parts.join(' ');
+    return parts.join(" ");
   }
 }

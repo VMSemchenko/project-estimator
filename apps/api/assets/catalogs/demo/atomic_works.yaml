@@ -1,0 +1,14 @@
+# Demo Atomic Works Catalog - Minimal set for testing and learning
+# Contains only 2 items for quick experimentation
+
+atomic_works:
+  # REQUIREMENTS DOCUMENTATION
+  - id: write_user_story
+    name: Write User Story
+    description: Create user story with acceptance criteria
+    base_hours: 0.5
+    category: documentation
+    ba_process: requirements_documentation
+    keywords:
+      - user story
+      - documentation

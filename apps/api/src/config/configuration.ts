@@ -12,10 +12,13 @@ export interface ZhipuAIConfig {
   embeddingModel: string;
 }
 
-export interface GeminiConfig {
+export interface OpenAIConfig {
   apiKey: string;
-  llmModel: string;
   embeddingModel: string;
+}
+
+export interface LocalEmbeddingConfig {
+  model: string;
 }
 
 export interface MongoDBConfig {
@@ -34,10 +37,10 @@ export interface LangfuseConfig {
 export interface Config {
   app: AppConfig;
   zhipuai: ZhipuAIConfig;
-  gemini: GeminiConfig;
+  openai: OpenAIConfig;
+  localEmbedding: LocalEmbeddingConfig;
   mongodb: MongoDBConfig;
   langfuse: LangfuseConfig;
-  llmProvider: string;
 }
 
 export default registerAs(
@@ -49,16 +52,17 @@ export default registerAs(
     },
     zhipuai: {
       apiKey: process.env.ZHIPUAI_API_KEY || "",
-      baseUrl:
-        process.env.ZHIPUAI_BASE_URL || "https://open.bigmodel.cn/api/paas/v4",
+      baseUrl: process.env.ZHIPUAI_BASE_URL || "https://api.z.ai/api/paas/v4",
       llmModel: process.env.LLM_MODEL || "glm-5",
-      embeddingModel: process.env.EMBEDDING_MODEL || "embedding-3",
+      embeddingModel: process.env.EMBEDDING_MODEL || "embedding-2",
     },
-    gemini: {
-      apiKey: process.env.GEMINI_API_KEY || "",
-      llmModel: process.env.GEMINI_MODEL || "gemini-1.5-flash",
+    openai: {
+      apiKey: process.env.OPENAI_API_KEY || "",
       embeddingModel:
-        process.env.GEMINI_EMBEDDING_MODEL || "text-embedding-004",
+        process.env.OPENAI_EMBEDDING_MODEL || "text-embedding-ada-002",
+    },
+    localEmbedding: {
+      model: process.env.LOCAL_EMBEDDING_MODEL || "Xenova/all-MiniLM-L6-v2",
     },
     mongodb: {
       uri: process.env.MONGODB_URI || "",
@@ -72,6 +76,5 @@ export default registerAs(
       host: process.env.LANGFUSE_HOST || "https://cloud.langfuse.com",
       enabled: process.env.LANGFUSE_ENABLED === "true",
     },
-    llmProvider: process.env.LLM_PROVIDER || "zhipuai",
   }),
 );

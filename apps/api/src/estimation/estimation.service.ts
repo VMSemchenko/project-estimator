@@ -12,11 +12,12 @@ import {
   EstimationErrorType,
   EstimationErrorDetails,
 } from "./interfaces/estimation-job.interface";
-import { CreateEstimationDto } from "./dto/create-estimation.dto";
+import { CreateEstimationDto, CatalogSet } from "./dto/create-estimation.dto";
 import { AgentsService } from "../agents";
 import { TracingService, MetricsService } from "../observability";
 import { TraceContext } from "../observability/interfaces/trace-context.interface";
 import { LLMError } from "../agents/errors/llm-error";
+import { CatalogsService } from "../catalogs";
 
 /**
  * Service for managing estimation jobs
@@ -31,6 +32,7 @@ export class EstimationService {
     private readonly agentsService: AgentsService,
     private readonly tracingService: TracingService,
     private readonly metricsService: MetricsService,
+    private readonly catalogsService: CatalogsService,
   ) {}
 
   /**
@@ -62,6 +64,13 @@ export class EstimationService {
     const id = this.generateId();
     const now = new Date();
 
+    // Switch catalog set if specified and different from current
+    const catalogSet = dto.catalogSet || CatalogSet.REAL_WORLD;
+    if (catalogSet !== this.catalogsService.getCurrentCatalogSet()) {
+      this.logger.log(`Switching to catalog set: ${catalogSet}`);
+      await this.catalogsService.switchCatalogSet(catalogSet);
+    }
+
     const job: EstimationJob = {
       id,
       status: EstimationStatus.PENDING,
@@ -69,11 +78,14 @@ export class EstimationService {
       outputFolder: dto.outputFolder || "./reports",
       verbose: dto.verbose ?? false,
       testMode: dto.testMode ?? false,
+      catalogSet: catalogSet,
       createdAt: now,
     };
 
     this.jobs.set(id, job);
-    this.logger.log(`Created estimation job: ${id}`);
+    this.logger.log(
+      `Created estimation job: ${id} with catalog set: ${catalogSet}`,
+    );
 
     // Start processing asynchronously
     this.processEstimation(id).catch((error) => {

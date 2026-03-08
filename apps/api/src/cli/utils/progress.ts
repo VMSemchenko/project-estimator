@@ -3,42 +3,43 @@
  * Provides spinners, progress indicators, and formatted output
  */
 
-import * as readline from 'readline';
+import * as readline from "readline";
+import { Logger, LoggerOptions } from "./logger";
 
 /**
  * Spinner frames for animation
  */
-const SPINNER_FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
 /**
  * Status icons
  */
 const ICONS = {
-  success: '✓',
-  error: '✗',
-  warning: '⚠',
-  info: 'ℹ',
-  search: '🔍',
-  list: '📋',
-  gear: '🔧',
-  chart: '📊',
-  document: '📝',
-  folder: '📁',
+  success: "✓",
+  error: "✗",
+  warning: "⚠",
+  info: "ℹ",
+  search: "🔍",
+  list: "📋",
+  gear: "🔧",
+  chart: "📊",
+  document: "📝",
+  folder: "📁",
 };
 
 /**
  * Colors for terminal output
  */
 const COLORS = {
-  reset: '\x1b[0m',
-  bright: '\x1b[1m',
-  dim: '\x1b[2m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  red: '\x1b[31m',
-  blue: '\x1b[34m',
-  cyan: '\x1b[36m',
-  gray: '\x1b[90m',
+  reset: "\x1b[0m",
+  bright: "\x1b[1m",
+  dim: "\x1b[2m",
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  red: "\x1b[31m",
+  blue: "\x1b[34m",
+  cyan: "\x1b[36m",
+  gray: "\x1b[90m",
 };
 
 /**
@@ -49,6 +50,8 @@ export interface ProgressOptions {
   verbose?: boolean;
   /** Disable spinners (for non-TTY) */
   noSpinners?: boolean;
+  /** Logger options for file logging */
+  loggerOptions?: LoggerOptions;
 }
 
 /**
@@ -67,11 +70,19 @@ export interface StepInfo {
  * Predefined steps for the estimation pipeline
  */
 export const ESTIMATION_STEPS: StepInfo[] = [
-  { name: 'validation', icon: 'search', description: 'Validating input artifacts' },
-  { name: 'extraction', icon: 'list', description: 'Extracting requirements' },
-  { name: 'decomposition', icon: 'gear', description: 'Decomposing into atomic works' },
-  { name: 'estimation', icon: 'chart', description: 'Calculating estimates' },
-  { name: 'reporting', icon: 'document', description: 'Generating report' },
+  {
+    name: "validation",
+    icon: "search",
+    description: "Validating input artifacts",
+  },
+  { name: "extraction", icon: "list", description: "Extracting requirements" },
+  {
+    name: "decomposition",
+    icon: "gear",
+    description: "Decomposing into atomic works",
+  },
+  { name: "estimation", icon: "chart", description: "Calculating estimates" },
+  { name: "reporting", icon: "document", description: "Generating report" },
 ];
 
 /**
@@ -80,19 +91,22 @@ export const ESTIMATION_STEPS: StepInfo[] = [
 export class Progress {
   private currentFrame = 0;
   private spinnerInterval: NodeJS.Timeout | null = null;
-  private currentStep = '';
+  private currentStep = "";
   private options: ProgressOptions;
   private isTTY: boolean;
+  private logger: Logger;
 
   constructor(options: ProgressOptions = {}) {
     this.options = options;
     this.isTTY = process.stdout.isTTY && !options.noSpinners;
+    this.logger = new Logger(options.loggerOptions);
   }
 
   /**
    * Start a spinner with a message
    */
   start(message: string): void {
+    this.logger.info(message);
     if (!this.isTTY) {
       console.log(message);
       return;
@@ -115,7 +129,10 @@ export class Progress {
   succeed(message?: string): void {
     this.stopSpinner();
     const displayMessage = message || this.currentStep;
-    console.log(`${COLORS.green}${ICONS.success}${COLORS.reset} ${displayMessage}`);
+    this.logger.success(displayMessage);
+    console.log(
+      `${COLORS.green}${ICONS.success}${COLORS.reset} ${displayMessage}`,
+    );
   }
 
   /**
@@ -124,6 +141,7 @@ export class Progress {
   fail(message?: string): void {
     this.stopSpinner();
     const displayMessage = message || this.currentStep;
+    this.logger.error(displayMessage);
     console.log(`${COLORS.red}${ICONS.error}${COLORS.reset} ${displayMessage}`);
   }
 
@@ -132,6 +150,7 @@ export class Progress {
    */
   warn(message: string): void {
     this.stopSpinner();
+    this.logger.warn(message);
     console.log(`${COLORS.yellow}${ICONS.warning}${COLORS.reset} ${message}`);
   }
 
@@ -140,6 +159,7 @@ export class Progress {
    */
   info(message: string): void {
     this.stopSpinner();
+    this.logger.info(message);
     console.log(`${COLORS.blue}${ICONS.info}${COLORS.reset} ${message}`);
   }
 
@@ -148,6 +168,7 @@ export class Progress {
    */
   update(message: string): void {
     this.currentStep = message;
+    this.logger.info(message);
     if (!this.isTTY) {
       console.log(message);
     }
@@ -159,6 +180,7 @@ export class Progress {
   logItem(message: string, success = true): void {
     const icon = success ? ICONS.success : ICONS.error;
     const color = success ? COLORS.green : COLORS.red;
+    this.logger.log(success ? "success" : "error", `  - ${message}`);
     console.log(`   ${color}${icon}${COLORS.reset} ${message}`);
   }
 
@@ -167,6 +189,7 @@ export class Progress {
    */
   verbose(message: string): void {
     if (this.options.verbose) {
+      this.logger.debug(`   → ${message}`);
       console.log(`${COLORS.gray}   → ${message}${COLORS.reset}`);
     }
   }
@@ -176,6 +199,7 @@ export class Progress {
    */
   header(icon: keyof typeof ICONS, message: string): void {
     this.stopSpinner();
+    this.logger.info(`${ICONS[icon]} ${message}...`);
     console.log(`\n${ICONS[icon]} ${message}...`);
   }
 
@@ -183,18 +207,16 @@ export class Progress {
    * Print a summary box
    */
   summary(title: string, items: Record<string, string | number>): void {
-    const lines = [
-      '═'.repeat(43),
-      `${COLORS.bright}${title}:${COLORS.reset}`,
-    ];
+    const lines = ["═".repeat(43), `${COLORS.bright}${title}:${COLORS.reset}`];
 
     for (const [key, value] of Object.entries(items)) {
       lines.push(`  ${key}: ${value}`);
     }
 
-    lines.push('═'.repeat(43));
+    lines.push("═".repeat(43));
 
-    console.log('\n' + lines.join('\n'));
+    this.logger.info(`\n${title}: ${JSON.stringify(items)}`);
+    console.log("\n" + lines.join("\n"));
   }
 
   /**
@@ -202,7 +224,10 @@ export class Progress {
    */
   error(message: string, details?: string): void {
     this.stopSpinner();
-    console.log(`\n${COLORS.red}${COLORS.bright}Error:${COLORS.reset} ${message}`);
+    this.logger.error(`${message}${details ? ` - ${details}` : ""}`);
+    console.log(
+      `\n${COLORS.red}${COLORS.bright}Error:${COLORS.reset} ${message}`,
+    );
     if (details && this.options.verbose) {
       console.log(`${COLORS.gray}${details}${COLORS.reset}`);
     }
@@ -227,6 +252,7 @@ export class Progress {
    */
   stop(): void {
     this.stopSpinner();
+    this.logger.close();
   }
 }
 
@@ -241,9 +267,9 @@ export function createProgress(options: ProgressOptions = {}): Progress {
  * Format bytes to human readable
  */
 export function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
+  if (bytes === 0) return "0 B";
   const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const sizes = ["B", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }

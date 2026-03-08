@@ -1,54 +1,103 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { OpenAIEmbeddings } from "@langchain/openai";
 import { Embeddings } from "@langchain/core/embeddings";
 import {
   EmbeddingProvider,
   EmbeddingProviderConfig,
 } from "../interfaces/embedding-provider.interface";
 import { Config } from "../../config/configuration";
+import { pipeline, env } from "@xenova/transformers";
+
+// Configure transformers.js to use local cache
+env.allowLocalModels = false;
 
 /**
- * LangChain-based embedding provider using ZhipuAI's OpenAI-compatible API
+ * Local HuggingFace Transformers Embeddings wrapper that extends LangChain Embeddings class
+ * Uses @xenova/transformers for local inference - no API key required
+ */
+class LocalTransformersEmbeddings extends Embeddings {
+  private embedderPromise: Promise<any> | null = null;
+  private readonly modelName: string;
+
+  constructor(modelName: string = "Xenova/all-MiniLM-L6-v2") {
+    super({});
+    this.modelName = modelName;
+  }
+
+  private async getEmbedder() {
+    if (!this.embedderPromise) {
+      this.embedderPromise = pipeline("feature-extraction", this.modelName, {
+        quantized: true, // Use quantized model for smaller size
+      });
+    }
+    return this.embedderPromise;
+  }
+
+  async embedDocuments(texts: string[]): Promise<number[][]> {
+    const embedder = await this.getEmbedder();
+    const results: number[][] = [];
+
+    for (const text of texts) {
+      const output = await embedder(text, { pooling: "mean", normalize: true });
+      results.push(Array.from(output.data as Float32Array));
+    }
+
+    return results;
+  }
+
+  async embedQuery(text: string): Promise<number[]> {
+    const embedder = await this.getEmbedder();
+    const output = await embedder(text, { pooling: "mean", normalize: true });
+    return Array.from(output.data as Float32Array);
+  }
+}
+
+/**
+ * LangChain-based embedding provider using local HuggingFace Transformers
+ * No API key required - runs entirely locally
  */
 @Injectable()
-export class LangchainEmbeddingProvider implements EmbeddingProvider {
+export class LangchainEmbeddingProvider
+  implements EmbeddingProvider, OnModuleInit
+{
   private readonly logger = new Logger(LangchainEmbeddingProvider.name);
-  private readonly embeddings: OpenAIEmbeddings;
+  private readonly embeddings: LocalTransformersEmbeddings;
   private readonly modelName: string;
+  private initialized = false;
 
   constructor(private readonly configService: ConfigService) {
     const fullConfig = configService.get<Config>("config");
 
+    // Use local transformers for embeddings (no API key required)
     const config: EmbeddingProviderConfig = {
-      apiKey: fullConfig?.zhipuai?.apiKey || process.env.ZHIPUAI_API_KEY || "",
-      baseUrl:
-        fullConfig?.zhipuai?.baseUrl ||
-        process.env.ZHIPUAI_BASE_URL ||
-        "https://open.bigmodel.cn/api/paas/v4",
+      apiKey: "", // Not needed for local embeddings
+      baseUrl: "", // Not needed for local embeddings
       modelName:
-        fullConfig?.zhipuai?.embeddingModel ||
-        process.env.EMBEDDING_MODEL ||
-        "embedding-3",
+        fullConfig?.localEmbedding?.model ||
+        process.env.LOCAL_EMBEDDING_MODEL ||
+        "Xenova/all-MiniLM-L6-v2",
       batchSize: 100,
     };
 
     this.modelName = config.modelName;
     this.logger.log(
-      `Initializing embedding provider with model: ${config.modelName}`,
+      `Initializing local embedding provider with model: ${config.modelName}`,
     );
 
-    if (!config.apiKey) {
-      throw new Error("ZHIPUAI_API_KEY is not configured");
-    }
+    this.embeddings = new LocalTransformersEmbeddings(config.modelName);
+  }
 
-    this.embeddings = new OpenAIEmbeddings({
-      modelName: config.modelName,
-      openAIApiKey: config.apiKey,
-      configuration: {
-        baseURL: config.baseUrl,
-      },
-    });
+  async onModuleInit() {
+    // Pre-load the model on initialization
+    this.logger.log("Pre-loading local embedding model...");
+    try {
+      await this.embeddings.embedQuery("test");
+      this.initialized = true;
+      this.logger.log("Local embedding model loaded successfully");
+    } catch (error) {
+      this.logger.error(`Failed to load embedding model: ${error}`);
+      throw error;
+    }
   }
 
   /**

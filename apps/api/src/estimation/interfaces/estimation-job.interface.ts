@@ -101,6 +101,7 @@ export interface EstimationJob {
   outputFolder: string;
   verbose: boolean;
   testMode: boolean;
+  catalogSet?: string;
   createdAt: Date;
   completedAt?: Date;
   summary?: EstimationSummary;

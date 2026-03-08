@@ -1,0 +1,11 @@
+# Demo Coefficients Catalog - Minimal set for testing and learning
+# Contains only 2 items for quick experimentation
+
+coefficients:
+  - id: complex_domain
+    name: Complex Domain
+    description: Project involves complex business domain requiring extra analysis
+    multiplier: 1.3
+    criteria:
+      - Complex business rules
+      - Multiple integrations

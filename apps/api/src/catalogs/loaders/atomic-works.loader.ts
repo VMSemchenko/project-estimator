@@ -1,14 +1,14 @@
-import { Injectable, Logger } from '@nestjs/common';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as yaml from 'yaml';
+import { Injectable, Logger } from "@nestjs/common";
+import * as fs from "fs";
+import * as path from "path";
+import * as yaml from "yaml";
 import {
   AtomicWork,
   AtomicWorkYaml,
   AtomicWorksCatalog,
   AtomicWorkDocument,
   AtomicWorkCategory,
-} from '../interfaces/atomic-work.interface';
+} from "../interfaces/atomic-work.interface";
 
 /**
  * Loader for Atomic Works catalog from YAML file.
@@ -21,21 +21,28 @@ export class AtomicWorksLoader {
 
   /**
    * Load atomic works from the YAML catalog file
-   * @param catalogPath - Path to the atomic_works.yaml file
+   * @param catalogSet - The catalog set to load ('demo' or 'real-world')
+   * @param catalogPath - Optional explicit path to the atomic_works.yaml file
    */
-  async load(catalogPath?: string): Promise<AtomicWork[]> {
+  async load(
+    catalogSet: string = "real-world",
+    catalogPath?: string,
+  ): Promise<AtomicWork[]> {
     const filePath =
       catalogPath ||
-      path.join(__dirname, '../../../assets/catalogs/atomic_works.yaml');
+      path.join(
+        process.cwd(),
+        `apps/api/assets/catalogs/${catalogSet}/atomic_works.yaml`,
+      );
 
     this.logger.log(`Loading atomic works from: ${filePath}`);
 
     try {
-      const fileContent = await fs.promises.readFile(filePath, 'utf-8');
+      const fileContent = await fs.promises.readFile(filePath, "utf-8");
       const catalog: AtomicWorksCatalog = yaml.parse(fileContent);
 
       if (!catalog || !catalog.atomic_works) {
-        throw new Error('Invalid atomic works catalog structure');
+        throw new Error("Invalid atomic works catalog structure");
       }
 
       this.atomicWorks = catalog.atomic_works.map((item: AtomicWorkYaml) =>
@@ -107,7 +114,7 @@ export class AtomicWorksLoader {
     return {
       ...work,
       searchableText: this.createSearchableText(work),
-      docType: 'atomic_work',
+      docType: "atomic_work",
     };
   }
 
@@ -139,6 +146,6 @@ export class AtomicWorksLoader {
       work.baProcess,
       ...work.keywords,
     ];
-    return parts.join(' ');
+    return parts.join(" ");
   }
 }

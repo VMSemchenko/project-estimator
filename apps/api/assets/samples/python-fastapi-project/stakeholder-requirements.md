@@ -15,7 +15,6 @@ Users must be able to register, login, and manage their accounts securely.
 
 ### Priority: High
 
-### Effort Estimate: 50 hours
 
 ---
 
@@ -34,7 +33,6 @@ Users must be able to create and manage workspaces for their teams.
 
 ### Priority: High
 
-### Effort Estimate: 45 hours
 
 ---
 
@@ -52,7 +50,6 @@ Teams must be able to organize work into projects within workspaces.
 
 ### Priority: High
 
-### Effort Estimate: 35 hours
 
 ---
 
@@ -72,7 +69,6 @@ Users must be able to create, update, and organize tasks.
 
 ### Priority: High
 
-### Effort Estimate: 80 hours
 
 ---
 
@@ -91,7 +87,6 @@ Multiple users must be able to collaborate on tasks in real-time.
 
 ### Priority: High
 
-### Effort Estimate: 70 hours
 
 ---
 
@@ -110,7 +105,6 @@ Users must be able to discuss tasks through comments.
 
 ### Priority: Medium
 
-### Effort Estimate: 40 hours
 
 ---
 
@@ -128,7 +122,6 @@ Users must be able to attach files to tasks and comments.
 
 ### Priority: Medium
 
-### Effort Estimate: 30 hours
 
 ---
 
@@ -146,7 +139,6 @@ Users must be able to track time spent on tasks.
 
 ### Priority: Medium
 
-### Effort Estimate: 45 hours
 
 ---
 
@@ -165,7 +157,6 @@ Users must receive notifications about relevant activities.
 
 ### Priority: Medium
 
-### Effort Estimate: 50 hours
 
 ---
 
@@ -184,7 +175,6 @@ The system must integrate with popular development tools.
 
 ### Priority: Medium
 
-### Effort Estimate: 80 hours
 
 ---
 
@@ -202,7 +192,6 @@ Users must be able to find tasks quickly.
 
 ### Priority: Medium
 
-### Effort Estimate: 35 hours
 
 ---
 
@@ -220,7 +209,6 @@ Native mobile apps for iOS and Android.
 
 ### Priority: High
 
-### Effort Estimate: 120 hours
 
 ---
 
@@ -238,4 +226,3 @@ Workspace administrators can configure settings.
 
 ### Priority: Medium
 
-### Effort Estimate: 40 hours

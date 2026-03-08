@@ -106,6 +106,8 @@ Return JSON with the following structure:
 
 ## Markdown Report Template
 
+The report should follow this structure. Use the data from context variables to fill in actual values.
+
 ```markdown
 # BA Work Estimation Report
 
@@ -124,19 +126,13 @@ Return JSON with the following structure:
 | Overall Confidence | {{confidenceLevel}} |
 
 ### Key Findings
-- {{keyFinding1}}
-- {{keyFinding2}}
-- {{keyFinding3}}
+[Generate 2-3 key findings based on the estimation data]
 
 ---
 
 ## Input Artifacts
 
-| Document | Status | Quality |
-|----------|--------|---------|
-| Business Vision | ✅ Present | Good |
-| Stakeholder Requirements | ✅ Present | Good |
-| High-Level Architecture | ⚠️ Partial | Medium |
+[List the artifacts from validationResults]
 
 ---
 
@@ -144,70 +140,52 @@ Return JSON with the following structure:
 
 | BA Process | Hours | % of Total |
 |------------|-------|------------|
-| Requirements Elicitation | {{hours}} | {{percent}}% |
-| Requirements Documentation | {{hours}} | {{percent}}% |
-| Requirements Analysis | {{hours}} | {{percent}}% |
-| Requirements Validation | {{hours}} | {{percent}}% |
-| Requirements Management | {{hours}} | {{percent}}% |
+[Generate rows based on estimates data - one row per BA process with calculated hours and percentage]
 
 ---
 
-## Breakdown by Requirement Priority
+## Breakdown by Requirement
 
-| Priority | Hours | Requirements |
-|----------|-------|--------------|
-| High | {{hours}} | {{count}} |
-| Medium | {{hours}} | {{count}} |
-| Low | {{hours}} | {{count}} |
+| Requirement | Hours | Works Count |
+|-------------|-------|-------------|
+[Generate rows based on estimates data - one row per requirement]
 
 ---
 
 ## Detailed Estimates
 
-### REQ-001: {{Requirement Title}}
+[For each requirement, show a table with all atomic works and their PERT values]
+
+### [Requirement ID]: [Requirement Title]
 
 | Atomic Work | O | M | P | Expected | Confidence |
 |-------------|---|---|---|----------|------------|
-| Write User Story | 1.0 | 1.5 | 2.5 | 1.58 | High |
-| Create Acceptance Criteria | 0.5 | 1.0 | 1.5 | 1.0 | High |
+[Rows with actual estimate data]
 
-**Applied Coefficients**: None
-**Assumptions**: 
-- Stakeholder available within 24 hours
+**Applied Coefficients**: [List any applied coefficients]
+**Assumptions**: [List assumptions from the estimate]
 
 ---
 
 ## RAID Context
 
 ### Risks
-1. {{risk1}}
-2. {{risk2}}
+[List risks identified from estimates and requirements]
 
 ### Assumptions
-1. {{assumption1}}
-2. {{assumption2}}
+[List assumptions from estimates]
 
 ### Dependencies
-1. {{dependency1}}
-2. {{dependency2}}
+[List any dependencies identified]
 
 ### Issues
-1. {{issue1}}
-2. {{issue2}}
+[List any issues or concerns]
 
 ---
 
 ## Recommendations
 
-1. **{{Recommendation 1}}**
-   - Impact: High
-   - Effort: Low
-   - Description: {{description}}
-
-2. **{{Recommendation 2}}**
-   - Impact: Medium
-   - Effort: Medium
-   - Description: {{description}}
+[Generate actionable recommendations based on the estimation results]
 
 ---
 

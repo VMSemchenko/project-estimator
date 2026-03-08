@@ -15,7 +15,6 @@ Patients must be able to register and verify their identity securely.
 
 ### Priority: High
 
-### Effort Estimate: 80 hours
 
 ---
 
@@ -34,7 +33,6 @@ Patients must be able to view their medical records.
 
 ### Priority: High
 
-### Effort Estimate: 100 hours
 
 ---
 
@@ -53,7 +51,6 @@ Patients must be able to schedule and manage appointments online.
 
 ### Priority: High
 
-### Effort Estimate: 90 hours
 
 ---
 
@@ -72,7 +69,6 @@ Patients must be able to communicate with their healthcare team.
 
 ### Priority: High
 
-### Effort Estimate: 70 hours
 
 ---
 
@@ -91,7 +87,6 @@ Patients must be able to manage their medications.
 
 ### Priority: High
 
-### Effort Estimate: 60 hours
 
 ---
 
@@ -110,7 +105,6 @@ Patients must be able to view and pay bills online.
 
 ### Priority: Medium
 
-### Effort Estimate: 70 hours
 
 ---
 
@@ -129,7 +123,6 @@ Patients must be able to attend video appointments.
 
 ### Priority: High
 
-### Effort Estimate: 100 hours
 
 ---
 
@@ -148,7 +141,6 @@ Patients must receive timely notifications.
 
 ### Priority: Medium
 
-### Effort Estimate: 50 hours
 
 ---
 
@@ -167,7 +159,6 @@ Patients must be able to manage their profile information.
 
 ### Priority: Medium
 
-### Effort Estimate: 40 hours
 
 ---
 
@@ -186,7 +177,6 @@ Healthcare providers must have access to patient information.
 
 ### Priority: High
 
-### Effort Estimate: 80 hours
 
 ---
 
@@ -205,7 +195,6 @@ The portal must integrate with electronic health record systems.
 
 ### Priority: Critical
 
-### Effort Estimate: 150 hours
 
 ---
 
@@ -224,7 +213,6 @@ Native mobile apps for iOS and Android.
 
 ### Priority: High
 
-### Effort Estimate: 160 hours
 
 ---
 
@@ -243,7 +231,6 @@ Administrative staff can manage patient accounts.
 
 ### Priority: Medium
 
-### Effort Estimate: 60 hours
 
 ---
 
@@ -262,4 +249,3 @@ System must meet healthcare security requirements.
 
 ### Priority: Critical
 
-### Effort Estimate: 100 hours

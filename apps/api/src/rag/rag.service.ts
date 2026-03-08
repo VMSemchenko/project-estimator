@@ -32,6 +32,18 @@ export class RagService {
     const startTime = Date.now();
     const { k = 4, scoreThreshold, filter } = options;
 
+    // Validate query parameter
+    if (!query || typeof query !== "string") {
+      this.logger.warn(
+        "Invalid query provided for similarity search, returning empty results",
+      );
+      return {
+        documents: [],
+        query: query || "",
+        duration: 0,
+      };
+    }
+
     this.logger.debug(`Performing similarity search with k=${k}`);
 
     // Create Langfuse trace if enabled
@@ -42,7 +54,11 @@ export class RagService {
 
     try {
       // Perform the search
-      const results = await this.mongodbStore.similaritySearch(query, k, filter);
+      const results = await this.mongodbStore.similaritySearch(
+        query,
+        k,
+        filter,
+      );
 
       // Transform results and apply score threshold if specified
       let documents: RetrievedDocument[] = results.map((result, index) => ({
@@ -167,7 +183,11 @@ export class RagService {
     });
 
     try {
-      const result = await this.mongodbStore.addDocuments(texts, metadatas, ids);
+      const result = await this.mongodbStore.addDocuments(
+        texts,
+        metadatas,
+        ids,
+      );
 
       if (trace) {
         trace.update({
@@ -219,6 +239,14 @@ export class RagService {
    */
   async getDocumentCount(): Promise<number> {
     return this.mongodbStore.getDocumentCount();
+  }
+
+  /**
+   * Clear all documents from the collection
+   */
+  async clearCollection(): Promise<void> {
+    this.logger.log("Clearing all documents from vector store");
+    await this.mongodbStore.clearCollection();
   }
 
   /**

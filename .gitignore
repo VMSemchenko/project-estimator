@@ -82,3 +82,4 @@ data/processed/
 
 # Langfuse exports
 langfuse-exports/
+logs/

@@ -1,14 +1,14 @@
-import { Injectable, Logger } from '@nestjs/common';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as yaml from 'yaml';
+import { Injectable, Logger } from "@nestjs/common";
+import * as fs from "fs";
+import * as path from "path";
+import * as yaml from "yaml";
 import {
   BaProcess,
   BaProcessYaml,
   BaProcessesCatalog,
   BaProcessDocument,
   BaProcessCategory,
-} from '../interfaces/ba-process.interface';
+} from "../interfaces/ba-process.interface";
 
 /**
  * Loader for BA Processes catalog from YAML file.
@@ -21,21 +21,28 @@ export class BaProcessesLoader {
 
   /**
    * Load BA processes from the YAML catalog file
-   * @param catalogPath - Path to the ba_processes.yaml file
+   * @param catalogSet - The catalog set to load ('demo' or 'real-world')
+   * @param catalogPath - Optional explicit path to the ba_processes.yaml file
    */
-  async load(catalogPath?: string): Promise<BaProcess[]> {
+  async load(
+    catalogSet: string = "real-world",
+    catalogPath?: string,
+  ): Promise<BaProcess[]> {
     const filePath =
       catalogPath ||
-      path.join(__dirname, '../../../assets/catalogs/ba_processes.yaml');
+      path.join(
+        process.cwd(),
+        `apps/api/assets/catalogs/${catalogSet}/ba_processes.yaml`,
+      );
 
     this.logger.log(`Loading BA processes from: ${filePath}`);
 
     try {
-      const fileContent = await fs.promises.readFile(filePath, 'utf-8');
+      const fileContent = await fs.promises.readFile(filePath, "utf-8");
       const catalog: BaProcessesCatalog = yaml.parse(fileContent);
 
       if (!catalog || !catalog.ba_processes) {
-        throw new Error('Invalid BA processes catalog structure');
+        throw new Error("Invalid BA processes catalog structure");
       }
 
       this.baProcesses = catalog.ba_processes.map((item: BaProcessYaml) =>
@@ -88,7 +95,7 @@ export class BaProcessesLoader {
     return {
       ...process,
       searchableText: this.createSearchableText(process),
-      docType: 'ba_process',
+      docType: "ba_process",
     };
   }
 
@@ -111,6 +118,6 @@ export class BaProcessesLoader {
    */
   private createSearchableText(process: BaProcess): string {
     const parts = [process.name, process.description, process.category];
-    return parts.join(' ');
+    return parts.join(" ");
   }
 }

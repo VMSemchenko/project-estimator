@@ -36,7 +36,7 @@ describe('Configuration', () => {
       const zhipuaiConfig = configService.get('config.zhipuai');
       
       expect(zhipuaiConfig).toBeDefined();
-      expect(zhipuaiConfig?.baseUrl).toBe('https://open.bigmodel.cn/api/paas/v4');
+      expect(zhipuaiConfig?.baseUrl).toBe('https://api.z.ai/api/paas/v4');
       expect(zhipuaiConfig?.llmModel).toBe('glm-5');
       expect(zhipuaiConfig?.embeddingModel).toBe('embedding-3');
     });

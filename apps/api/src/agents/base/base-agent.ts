@@ -246,11 +246,12 @@ export abstract class BaseAgentNode implements AgentNode {
     const duration = Date.now() - startTime;
     this.logger.log(`Completed ${this.name} node in ${duration}ms`);
     this.logger.debug(
-      `State update: ${JSON.stringify({
+      `Output: ${JSON.stringify({
         validationStatus: update.validationStatus,
-        requirementsCount: update.requirements?.length,
-        atomicWorksCount: update.atomicWorks?.length,
-        estimatesCount: update.estimates?.length,
+        artifactsAdded: update.artifacts?.length,
+        requirementsExtracted: update.requirements?.length,
+        atomicWorksDecomposed: update.atomicWorks?.length,
+        estimatesGenerated: update.estimates?.length,
         hasReport: !!update.report,
       })}`,
     );

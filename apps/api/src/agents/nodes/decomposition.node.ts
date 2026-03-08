@@ -150,12 +150,24 @@ export class DecompositionNode extends BaseAgentNode {
 
     try {
       // Invoke LLM for decomposition
+      // The prompt template returns a nested structure with atomicWorks inside each mapping
       const response = await this.invokeLLMJson<{
         mappings: Array<{
-          atomicWorkId: string;
-          atomicWorkName: string;
-          baProcess: string;
-          rationale: string;
+          requirementId: string;
+          requirementTitle?: string;
+          requirementType?: string;
+          complexityLevel?: string;
+          atomicWorks?: Array<{
+            id: string;
+            name: string;
+            baProcess: string;
+            rationale?: string;
+          }>;
+          // Legacy flat format support (for backward compatibility)
+          atomicWorkId?: string;
+          atomicWorkName?: string;
+          baProcess?: string;
+          rationale?: string;
         }>;
       }>(context, {
         defaultValue: { mappings: [] },
@@ -177,14 +189,53 @@ export class DecompositionNode extends BaseAgentNode {
         }));
       }
 
-      // Transform to atomic work mappings
-      return mappings.map((mapping) => ({
-        id: mapping.atomicWorkId,
-        name: mapping.atomicWorkName,
-        baProcess: mapping.baProcess,
-        rationale: mapping.rationale,
-        requirementId: requirement.id,
-      }));
+      // Flatten the nested atomicWorks structure from each mapping
+      // The LLM returns: mappings[].atomicWorks[]
+      // We need to flatten to: AtomicWorkMapping[]
+      const atomicWorkMappings: AtomicWorkMapping[] = [];
+
+      for (const mapping of mappings) {
+        // Check if this is the new nested format (has atomicWorks array)
+        if (mapping.atomicWorks && Array.isArray(mapping.atomicWorks)) {
+          // New nested format: extract atomic works from the nested array
+          for (const work of mapping.atomicWorks) {
+            if (work && work.id) {
+              atomicWorkMappings.push({
+                id: String(work.id),
+                name: String(work.name || "Unknown Work"),
+                baProcess: String(work.baProcess || "Unknown"),
+                rationale: String(work.rationale || ""),
+                requirementId: requirement.id,
+              });
+            }
+          }
+        } else if (mapping.atomicWorkId) {
+          // Legacy flat format: mapping directly contains atomic work fields
+          atomicWorkMappings.push({
+            id: String(mapping.atomicWorkId),
+            name: String(mapping.atomicWorkName || "Unknown Work"),
+            baProcess: String(mapping.baProcess || "Unknown"),
+            rationale: String(mapping.rationale || ""),
+            requirementId: requirement.id,
+          });
+        }
+      }
+
+      // If no valid mappings were extracted, use fallback from RAG results
+      if (atomicWorkMappings.length === 0) {
+        this.logger.warn(
+          "No valid atomic works extracted from LLM response, using fallback from RAG results",
+        );
+        return relevantWorks.slice(0, 3).map((doc) => ({
+          id: String(doc.metadata?.id || doc.id),
+          name: String(doc.metadata?.name || "Unknown Work"),
+          baProcess: String(doc.metadata?.baProcess || "Unknown"),
+          rationale: `Automatically matched based on similarity (score: ${doc.score?.toFixed(2)})`,
+          requirementId: requirement.id,
+        }));
+      }
+
+      return atomicWorkMappings;
     } catch (error) {
       this.logger.error(
         `Failed to map requirement ${requirement.id}: ${error}`,

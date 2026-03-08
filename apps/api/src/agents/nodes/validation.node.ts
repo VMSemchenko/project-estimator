@@ -1,20 +1,23 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { AgentType, PromptContext } from '../../prompts/interfaces/prompt-context.interface';
-import { BaseAgentNode } from '../base/base-agent';
+import * as fs from "fs";
+import * as path from "path";
+import {
+  AgentType,
+  PromptContext,
+} from "../../prompts/interfaces/prompt-context.interface";
+import { BaseAgentNode } from "../base/base-agent";
 import {
   EstimationState,
   NodeConfig,
   StateUpdate,
   Artifact,
   ValidationReport,
-} from '../interfaces/agent-state.interface';
-import { AgentDependencies } from '../interfaces/agent.interface';
+} from "../interfaces/agent-state.interface";
+import { AgentDependencies } from "../interfaces/agent.interface";
 
 /**
  * Required document types for validation
  */
-const REQUIRED_DOCUMENTS = ['BV', 'ShRD'];
+const REQUIRED_DOCUMENTS = ["BV", "ShRD"];
 
 /**
  * Document type patterns for identification
@@ -29,7 +32,7 @@ const DOCUMENT_PATTERNS: Record<string, RegExp[]> = {
  * Validates input artifacts for completeness and quality
  */
 export class ValidationNode extends BaseAgentNode {
-  readonly name = 'validation';
+  readonly name = "validation";
   readonly agentType = AgentType.VALIDATION;
 
   constructor(dependencies: AgentDependencies) {
@@ -39,7 +42,10 @@ export class ValidationNode extends BaseAgentNode {
   /**
    * Execute validation logic
    */
-  async execute(state: EstimationState, config?: NodeConfig): Promise<StateUpdate> {
+  async execute(
+    state: EstimationState,
+    config?: NodeConfig,
+  ): Promise<StateUpdate> {
     const startTime = this.logStart(state);
 
     try {
@@ -58,7 +64,8 @@ export class ValidationNode extends BaseAgentNode {
         missingArtifacts: documentCheck.missing,
         qualityIssues: qualityCheck.issues,
         recommendations: qualityCheck.recommendations,
-        canProceed: documentCheck.missing.length === 0 && qualityCheck.canProceed,
+        canProceed:
+          documentCheck.missing.length === 0 && qualityCheck.canProceed,
       };
 
       // Step 5: Determine if pipeline should continue
@@ -96,11 +103,11 @@ export class ValidationNode extends BaseAgentNode {
 
       if (stat.isFile()) {
         const ext = path.extname(file).toLowerCase();
-        
+
         // Only process supported file types
-        if (['.md', '.txt', '.docx', '.pdf'].includes(ext)) {
+        if ([".md", ".txt", ".docx", ".pdf"].includes(ext)) {
           const content = await this.readFileContent(filePath, ext);
-          
+
           artifacts.push({
             name: file,
             path: filePath,
@@ -118,16 +125,19 @@ export class ValidationNode extends BaseAgentNode {
   /**
    * Read file content based on file type
    */
-  private async readFileContent(filePath: string, ext: string): Promise<string> {
-    if (ext === '.md' || ext === '.txt') {
-      return fs.readFileSync(filePath, 'utf-8');
+  private async readFileContent(
+    filePath: string,
+    ext: string,
+  ): Promise<string> {
+    if (ext === ".md" || ext === ".txt") {
+      return fs.readFileSync(filePath, "utf-8");
     }
-    
+
     // For .docx and .pdf, we would need additional libraries
     // For now, return a placeholder
     this.logger.warn(`File type ${ext} not fully supported, reading as text`);
     try {
-      return fs.readFileSync(filePath, 'utf-8');
+      return fs.readFileSync(filePath, "utf-8");
     } catch {
       return `[Binary content from ${path.basename(filePath)}]`;
     }
@@ -148,7 +158,7 @@ export class ValidationNode extends BaseAgentNode {
       }
     }
 
-    return 'unknown';
+    return "unknown";
   }
 
   /**
@@ -175,13 +185,20 @@ export class ValidationNode extends BaseAgentNode {
   }> {
     // Build context for LLM
     const context: PromptContext = {
-      inputFolderPath: '',
+      inputFolderPath: "",
       discoveredFiles: artifacts.map((a) => ({
         name: a.name,
         path: a.path,
-        content: a.content.substring(0, 5000), // Limit content size
+        content: a.content, // Full document content for accurate validation
         type: a.type,
       })),
+    };
+
+    // Default response for fallback
+    const defaultResponse = {
+      issues: [] as string[],
+      recommendations: [] as string[],
+      canProceed: true,
     };
 
     try {
@@ -191,23 +208,32 @@ export class ValidationNode extends BaseAgentNode {
         recommendations: string[];
         canProceed: boolean;
       }>(context, {
-        defaultValue: {
-          issues: [],
-          recommendations: [],
-          canProceed: true,
-        },
+        defaultValue: defaultResponse,
       });
 
-      return response;
+      // Ensure the response has the expected structure
+      // The LLM might return a valid JSON but with missing fields
+      return {
+        issues: Array.isArray(response?.issues) ? response.issues : [],
+        recommendations: Array.isArray(response?.recommendations)
+          ? response.recommendations
+          : [],
+        canProceed:
+          typeof response?.canProceed === "boolean"
+            ? response.canProceed
+            : true,
+      };
     } catch (error) {
-      this.logger.warn(`Quality validation failed, proceeding with basic checks: ${error}`);
-      
+      this.logger.warn(
+        `Quality validation failed, proceeding with basic checks: ${error}`,
+      );
+
       // Fallback to basic validation
       const issues: string[] = [];
       const recommendations: string[] = [];
 
       for (const artifact of artifacts) {
-        if (artifact.content.length < 100) {
+        if (artifact.content && artifact.content.length < 100) {
           issues.push(`Document ${artifact.name} appears to be too short`);
         }
       }
@@ -226,27 +252,29 @@ export class ValidationNode extends BaseAgentNode {
   private determineValidationStatus(
     documentCheck: { found: string[]; missing: string[] },
     qualityCheck: { issues: string[]; canProceed: boolean },
-  ): 'valid' | 'invalid' | 'pending' {
+  ): "valid" | "invalid" | "pending" {
     if (documentCheck.missing.length > 0) {
-      return 'invalid';
+      return "invalid";
     }
 
     if (qualityCheck.issues.length > 0 && !qualityCheck.canProceed) {
-      return 'invalid';
+      return "invalid";
     }
 
     if (qualityCheck.issues.length > 0) {
-      return 'valid'; // Valid with warnings
+      return "valid"; // Valid with warnings
     }
 
-    return 'valid';
+    return "valid";
   }
 }
 
 /**
  * Factory function to create validation node
  */
-export function createValidationNode(dependencies: AgentDependencies): ValidationNode {
+export function createValidationNode(
+  dependencies: AgentDependencies,
+): ValidationNode {
   return new ValidationNode(dependencies);
 }
 
@@ -259,5 +287,7 @@ export async function validationNode(
 ): Promise<StateUpdate> {
   // This is a placeholder - in actual implementation, the node instance
   // would be created by the module and injected
-  throw new Error('ValidationNode must be created via factory with dependencies');
+  throw new Error(
+    "ValidationNode must be created via factory with dependencies",
+  );
 }

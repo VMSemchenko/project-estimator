@@ -154,7 +154,7 @@ export class LlmProvider {
       modelName: configService.get("LLM_MODEL", "glm-5"),
       openAIApiKey: configService.get("ZHIPUAI_API_KEY"),
       configuration: {
-        baseURL: "https://open.bigmodel.cn/api/paas/v4/",
+        baseURL: "https://api.z.ai/api/paas/v4/",
       },
       temperature: 0.1, // Low temperature for consistent estimation
     });
@@ -299,7 +299,7 @@ export class RagService {
       modelName: "embedding-3",
       openAIApiKey: configService.get("ZHIPUAI_API_KEY"),
       configuration: {
-        baseURL: "https://open.bigmodel.cn/api/paas/v4/",
+        baseURL: "https://api.z.ai/api/paas/v4/",
       },
     });
 
