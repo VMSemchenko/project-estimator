@@ -54,6 +54,41 @@ export abstract class BaseAgentNode implements AgentNode {
   }
 
   /**
+   * Get node context prefix for consistent logging
+   */
+  protected get nodePrefix(): string {
+    return `[${this.name}]`;
+  }
+
+  /**
+   * Log with node context
+   */
+  protected logNode(message: string, ...optionalParams: unknown[]): void {
+    this.logger.log(`${this.nodePrefix} ${message}`, ...optionalParams);
+  }
+
+  /**
+   * Log debug with node context
+   */
+  protected debugNode(message: string, ...optionalParams: unknown[]): void {
+    this.logger.debug(`${this.nodePrefix} ${message}`, ...optionalParams);
+  }
+
+  /**
+   * Log warning with node context
+   */
+  protected warnNode(message: string, ...optionalParams: unknown[]): void {
+    this.logger.warn(`${this.nodePrefix} ${message}`, ...optionalParams);
+  }
+
+  /**
+   * Log error with node context
+   */
+  protected errorNode(message: string, ...optionalParams: unknown[]): void {
+    this.logger.error(`${this.nodePrefix} ${message}`, ...optionalParams);
+  }
+
+  /**
    * Execute the node's logic - must be implemented by subclasses
    */
   abstract execute(
@@ -94,10 +129,19 @@ export abstract class BaseAgentNode implements AgentNode {
       context,
     );
 
-    // Create Langfuse trace if enabled
+    // Get provider information for tracing
+    const providerName = this.llmProvider.getCurrentProviderName();
+    const modelName = this.llmProvider.getModelName();
+
+    // Create Langfuse trace if enabled with provider metadata
     const trace = this.langfuseService?.createTrace({
       name: `${this.name}_llm_call`,
       input: { context, compiledPrompt },
+      metadata: {
+        provider: providerName,
+        model: modelName,
+        agentType: this.agentType,
+      },
     });
 
     try {
@@ -111,28 +155,58 @@ export abstract class BaseAgentNode implements AgentNode {
         new StringOutputParser(),
       ]);
 
-      // Invoke the chain
-      const response = await chain.invoke({});
+      // Invoke the chain with retry logic
+      const response = await this.llmProvider.executeWithRetry(
+        () => chain.invoke({}),
+        {
+          operation: "invoke",
+          node: this.name,
+        },
+      );
 
       const duration = Date.now() - startTime;
       this.logger.debug(`LLM invocation completed in ${duration}ms`);
 
-      // Update trace with result
-      trace?.update({
-        output: { response: response.substring(0, 500) + "..." },
-        metadata: { duration },
-      });
+      // Track LLM span with provider information
+      if (this.langfuseService && trace) {
+        this.langfuseService.trackLlmSpan(trace, {
+          name: `${this.name}_llm_generation`,
+          input: compiledPrompt,
+          output: response,
+          model: modelName,
+          provider: providerName,
+          duration,
+          metadata: {
+            agentType: this.agentType,
+          },
+        });
+      }
 
       return response;
     } catch (error) {
       const duration = Date.now() - startTime;
       this.logger.error(`LLM invocation failed after ${duration}ms: ${error}`);
 
-      // Update trace with error
-      trace?.update({
-        output: { error: String(error) },
-        metadata: { duration },
-      });
+      // Track error in LLM span
+      if (this.langfuseService && trace) {
+        this.langfuseService.trackLlmSpan(trace, {
+          name: `${this.name}_llm_generation_error`,
+          input: compiledPrompt,
+          output: String(error),
+          model: modelName,
+          provider: providerName,
+          duration,
+          metadata: {
+            agentType: this.agentType,
+            error: true,
+          },
+        });
+      }
+
+      // Re-throw if already an LLMError (from retry logic)
+      if (error instanceof LLMError) {
+        throw error;
+      }
 
       // Wrap error in LLMError for proper classification
       throw LLMError.fromError(error, {
