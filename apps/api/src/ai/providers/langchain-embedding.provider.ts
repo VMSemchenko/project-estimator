@@ -6,10 +6,33 @@ import {
   EmbeddingProviderConfig,
 } from "../interfaces/embedding-provider.interface";
 import { Config } from "../../config/configuration";
-import { pipeline, env } from "@xenova/transformers";
 
-// Configure transformers.js to use local cache
-env.allowLocalModels = false;
+// Dynamic import for ESM module @xenova/transformers
+// Using a workaround to prevent TypeScript from transforming the dynamic import
+// This is needed because @xenova/transformers is an ESM-only package
+const dynamicImport = new Function(
+  "modulePath",
+  "return import(modulePath)",
+) as (modulePath: string) => Promise<any>;
+
+// Module-level cache for transformers
+let transformersModule: {
+  pipeline: any;
+  env: any;
+} | null = null;
+
+async function getTransformers() {
+  if (!transformersModule) {
+    const transformers = await dynamicImport("@xenova/transformers");
+    transformersModule = {
+      pipeline: transformers.pipeline,
+      env: transformers.env,
+    };
+    // Configure transformers.js to use local cache
+    transformersModule.env.allowLocalModels = false;
+  }
+  return transformersModule;
+}
 
 /**
  * Local HuggingFace Transformers Embeddings wrapper that extends LangChain Embeddings class
@@ -26,6 +49,8 @@ class LocalTransformersEmbeddings extends Embeddings {
 
   private async getEmbedder() {
     if (!this.embedderPromise) {
+      // Load transformers dynamically (ESM module)
+      const { pipeline } = await getTransformers();
       this.embedderPromise = pipeline("feature-extraction", this.modelName, {
         quantized: true, // Use quantized model for smaller size
       });

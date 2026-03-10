@@ -6,7 +6,7 @@
 set -e
 
 # Configuration
-API_BASE_URL="${API_BASE_URL:-http://localhost:3000}"
+API_BASE_URL="${API_BASE_URL:-http://localhost:3002}"
 API_TIMEOUT="${API_TIMEOUT:-30}"
 
 # Colors for output

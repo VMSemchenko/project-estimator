@@ -7,7 +7,7 @@
 set -e
 
 # Default configuration
-API_URL="${API_URL:-http://localhost:3000}"
+API_URL="${API_URL:-http://localhost:3002}"
 PROJECT_FOLDER="${PROJECT_FOLDER:-apps/api/assets/samples/single-requirement}"
 CATALOG_SET="${CATALOG_SET:-demo}"
 VERBOSE="${VERBOSE:-true}"

@@ -22,7 +22,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 // Configuration
-const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
+const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3002";
 const POLL_INTERVAL = parseInt(process.env.POLL_INTERVAL || "2000", 10);
 const MAX_ATTEMPTS = parseInt(process.env.MAX_ATTEMPTS || "60", 10);
 

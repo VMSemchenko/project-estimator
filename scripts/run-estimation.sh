@@ -18,7 +18,7 @@
 set -e
 
 # Configuration
-API_BASE_URL="${API_BASE_URL:-http://localhost:3000}"
+API_BASE_URL="${API_BASE_URL:-http://localhost:3002}"
 POLL_INTERVAL="${POLL_INTERVAL:-2}"
 MAX_ATTEMPTS="${MAX_ATTEMPTS:-60}"
 
