@@ -4,7 +4,7 @@
 # This file contains ready-to-use curl commands for testing the estimator API
 
 # Configuration
-API_BASE_URL="${API_BASE_URL:-http://localhost:3000}"
+API_BASE_URL="${API_BASE_URL:-http://localhost:3002}"
 
 echo "Estimator API - cURL Commands"
 echo "API Base URL: $API_BASE_URL"

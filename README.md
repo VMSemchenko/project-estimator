@@ -144,7 +144,7 @@ npm run catalog:status
 **Create Estimation:**
 
 ```bash
-curl -X POST http://localhost:3000/estimate \
+curl -X POST http://localhost:3002/estimate \
   -H "Content-Type: application/json" \
   -d '{"inputFolder": "./apps/api/assets/samples/sample-project"}'
 ```
@@ -166,7 +166,7 @@ curl -X POST http://localhost:3000/estimate \
 **Get Estimation Status:**
 
 ```bash
-curl http://localhost:3000/estimate/est-20260308-abc123
+curl http://localhost:3002/estimate/est-20260308-abc123
 ```
 
 **Response:**
@@ -192,7 +192,7 @@ curl http://localhost:3000/estimate/est-20260308-abc123
 **Health Check:**
 
 ```bash
-curl http://localhost:3000/health
+curl http://localhost:3002/health
 ```
 
 **Response:**

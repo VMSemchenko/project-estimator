@@ -1,13 +1,13 @@
 {
   "info": {
     "name": "Estimator API",
-    "description": "Collection for testing the Estimator API endpoints. This API provides project estimation capabilities using AI agents.\n\n## Environment Variables\n- `API_BASE_URL`: Base URL for the API (default: http://localhost:3000)\n\n## Sample Projects\n- **sample-project**: E-Commerce Platform (React/NestJS)\n- **python-fastapi-project**: Task Management SaaS (Python/FastAPI)\n- **java-springboot-project**: Healthcare Patient Portal (Java/Spring Boot)\n- **go-microservices-project**: Real-time Analytics Platform (Go)",
+    "description": "Collection for testing the Estimator API endpoints. This API provides project estimation capabilities using AI agents.\n\n## Environment Variables\n- `API_BASE_URL`: Base URL for the API (default: http://localhost:3002)\n\n## Sample Projects\n- **sample-project**: E-Commerce Platform (React/NestJS)\n- **python-fastapi-project**: Task Management SaaS (Python/FastAPI)\n- **java-springboot-project**: Healthcare Patient Portal (Java/Spring Boot)\n- **go-microservices-project**: Real-time Analytics Platform (Go)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "API_BASE_URL",
-      "value": "http://localhost:3000",
+      "value": "http://localhost:3002",
       "type": "string"
     },
     {

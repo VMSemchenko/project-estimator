@@ -78,27 +78,27 @@ Quick test commands:
 
 ```bash
 # E-Commerce Platform
-curl -s -X POST http://localhost:3000/estimate \
+curl -s -X POST http://localhost:3002/estimate \
   -H 'Content-Type: application/json' \
   -d '{"inputFolder":"apps/api/assets/samples/sample-project","verbose":true}' | jq '.'
 
 # Python Project
-curl -s -X POST http://localhost:3000/estimate \
+curl -s -X POST http://localhost:3002/estimate \
   -H 'Content-Type: application/json' \
   -d '{"inputFolder":"apps/api/assets/samples/python-fastapi-project","verbose":true}' | jq '.'
 
 # Java Project
-curl -s -X POST http://localhost:3000/estimate \
+curl -s -X POST http://localhost:3002/estimate \
   -H 'Content-Type: application/json' \
   -d '{"inputFolder":"apps/api/assets/samples/java-springboot-project","verbose":true}' | jq '.'
 
 # Go Project
-curl -s -X POST http://localhost:3000/estimate \
+curl -s -X POST http://localhost:3002/estimate \
   -H 'Content-Type: application/json' \
   -d '{"inputFolder":"apps/api/assets/samples/go-microservices-project","verbose":true}' | jq '.'
 
 # Get all estimations
-curl -s http://localhost:3000/estimate | jq '.'
+curl -s http://localhost:3002/estimate | jq '.'
 ```
 
 ### 3. Postman
@@ -172,7 +172,7 @@ Get Estimation (200 OK):
 
 | Variable       | Default                 | Description                |
 | -------------- | ----------------------- | -------------------------- |
-| `API_BASE_URL` | `http://localhost:3000` | API base URL               |
+| `API_BASE_URL` | `http://localhost:3002` | API base URL               |
 | `API_TIMEOUT`  | `30`                    | Request timeout in seconds |
 
 ## Troubleshooting
@@ -181,7 +181,7 @@ Get Estimation (200 OK):
 
 ```bash
 # Check if the API is running
-curl http://localhost:3000/
+curl http://localhost:3002/
 
 # Check the logs
 npm run start:api
